@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MODELO PRINCIPAL: TAREFA
+// ============================================
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  
+  // Status da tarefa
+  status      TaskStatus @default(TODO)
+  
+  // Prioridade
+  priority    TaskPriority @default(MEDIUM)
+  
+  // Agente responsável
+  agentName   String?
+  agentId     String?
+  agent       Agent?   @relation(fields: [agentId], references: [id])
+  
+  // Datas
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  dueDate     DateTime?
+  completedAt DateTime?
+  
+  // Estimativas
+  estimatedHours Float?
+  actualHours    Float?
+  
+  // Relação com subtarefas
+  parentId    String?
+  parent      Task?    @relation("SubTasks", fields: [parentId], references: [id])
+  subtasks    Task[]   @relation("SubTasks")
+  
+  // Histórico de mudanças
+  statusHistory StatusChange[]
+  
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@index([agentId])
+}
+
+// ============================================
+// AGENTES DE IA
+// ============================================
+model Agent {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  role        AgentRole
+  description String?  @db.Text
+  
+  // Capacidades
+  skills      String[]
+  
+  // Status
+  isActive    Boolean  @default(true)
+  
+  // Métricas
+  tasksCompleted Int @default(0)
+  successRate    Float @default(0)
+  
+  // Relações
+  tasks       Task[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([role])
+}
+
+// ============================================
+// HISTÓRICO DE MUDANÇAS DE STATUS
+// ============================================
+model StatusChange {
+  id          String   @id @default(cuid())
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  fromStatus  TaskStatus?
+  toStatus    TaskStatus
+  
+  changedAt   DateTime @default(now())
+  notes       String?  @db.Text
+  
+  @@index([taskId])
+  @@index([changedAt])
+}
+
+// ============================================
+// ENUMS
+// ============================================
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+  BLOCKED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum AgentRole {
+  MAESTRO      // Orquestrador
+  SENTINEL     // Revisor/Qualidade
+  ARCHITECTON  // Arquiteto
+  PIXEL        // Designer
+}

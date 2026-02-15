@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS Protocol - Task Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Scanline Effect -->
+    <div class="scanlines"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <span class="logo-bracket">[</span>
+                <span class="logo-text">NEXUS</span>
+                <span class="logo-bracket">]</span>
+                <span class="logo-protocol">PROTOCOL</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">▣</span> DASHBOARD
+                </a>
+                <a href="board.html" class="nav-link active">
+                    <span class="nav-icon">▦</span> TASK BOARD
+                </a>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">SYSTEM ONLINE</span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Board Container -->
+    <main class="board-container">
+        <div class="board-header">
+            <h1 class="board-title">
+                <span class="title-bracket">{'</span>
+                MISSION CONTROL BOARD
+                <span class="title-bracket">'}</span>
+            </h1>
+            <button class="btn-add-task">
+                <span class="btn-icon">+</span> NEW TASK
+            </button>
+        </div>
+
+        <div class="board">
+            <!-- Column: QUEUE -->
+            <div class="board-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <span class="column-icon">◇</span>
+                        <span>QUEUE</span>
+                    </div>
+                    <div class="column-count">5</div>
+                </div>
+                <div class="column-content">
+                    <div class="board-card">
+                        <div class="card-header">
+                            <span class="card-id">#E4721</span>
+                            <span class="card-priority priority-low">LOW</span>
+                        </div>
+                        <div class="card-title">UI Component Refactoring</div>
+                        <div class="card-tags">
+                            <span class="tag">frontend</span>
+                            <span class="tag">optimization</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-07</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card">
+                        <div class="card-header">
+                            <span class="card-id">#E4722</span>
+                            <span class="card-priority priority-medium">MEDIUM</span>
+                        </div>
+                        <div class="card-title">Documentation Update</div>
+                        <div class="card-tags">
+                            <span class="tag">docs</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-12</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card">
+                        <div class="card-header">
+                            <span class="card-id">#E4723</span>
+                            <span class="card-priority priority-high">HIGH</span>
+                        </div>
+                        <div class="card-title">Performance Metrics Integration</div>
+                        <div class="card-tags">
+                            <span class="tag">analytics</span>
+                            <span class="tag">backend</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Unassigned</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card">
+                        <div class="card-header">
+                            <span class="card-id">#E4724</span>
+                            <span class="card-priority priority-low">LOW</span>
+                        </div>
+                        <div class="card-title">Unit Tests - Payment Module</div>
+                        <div class="card-tags">
+                            <span class="tag">testing</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-03</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card">
+                        <div class="card-header">
+                            <span class="card-id">#E4725</span>
+                            <span class="card-priority priority-medium">MEDIUM</span>
+                        </div>
+                        <div class="card-title">Email Notification System</div>
+                        <div class="card-tags">
+                            <span class="tag">backend</span>
+                            <span class="tag">notifications</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-15</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column: IN PROGRESS -->
+            <div class="board-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <span class="column-icon">◈</span>
+                        <span>IN PROGRESS</span>
+                    </div>
+                    <div class="column-count">4</div>
+                </div>
+                <div class="column-content">
+                    <div class="board-card card-processing">
+                        <div class="card-header">
+                            <span class="card-id">#A2847</span>
+                            <span class="card-priority priority-high">HIGH</span>
+                        </div>
+                        <div class="card-title">Neural Network Training - Phase 3</div>
+                        <div class="card-tags">
+                            <span class="tag">AI</span>
+                            <span class="tag">training</span>
+                        </div>
+                        <div class="card-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 67%"></div>
+                            </div>
+                            <span class="progress-text">67%</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-04</span>
+                            <span class="card-time">00:42:18</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card card-processing">
+                        <div class="card-header">
+                            <span class="card-id">#B1923</span>
+                            <span class="card-priority priority-medium">MEDIUM</span>
+                        </div>
+                        <div class="card-title">Database Synchronization</div>
+                        <div class="card-tags">
+                            <span class="tag">database</span>
+                            <span class="tag">sync</span>
+                        </div>
+                        <div class="card-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 34%"></div>
+                            </div>
+                            <span class="progress-text">34%</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-09</span>
+                            <span class="card-time">00:15:33</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card card-processing">
+                        <div class="card-header">
+                            <span class="card-id">#C0451</span>
+                            <span class="card-priority priority-critical">CRITICAL</span>
+                        </div>
+                        <div class="card-title">Security Protocol Update</div>
+                        <div class="card-tags">
+                            <span class="tag">security</span>
+                            <span class="tag">critical</span>
+                        </div>
+                        <div class="card-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 89%"></div>
+                            </div>
+                            <span class="progress-text">89%</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-01</span>
+                            <span class="card-time">01:28:04</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card card-processing">
+                        <div class="card-header">
+                            <span class="card-id">#D7182</span>
+                            <span class="card-priority priority-medium">MEDIUM</span>
+                        </div>
+                        <div class="card-title">API Gateway Deployment</div>
+                        <div class="card-tags">
+                            <span class="tag">devops</span>
+                            <span class="tag">deployment</span>
+                        </div>
+                        <div class="card-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 12%"></div>
+                            </div>
+                            <span class="progress-text">12%</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-06</span>
+                            <span class="card-time">00:08:47</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column: TESTING -->
+            <div class="board-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <span class="column-icon">◎</span>
+                        <span>TESTING</span>
+                    </div>
+                    <div class="column-count">3</div>
+                </div>
+                <div class="column-content">
+                    <div class="board-card">
+                        <div class="card-header">
+                            <span class="card-id">#F3891</span>
+                            <span class="card-priority priority-high">HIGH</span>
+                        </div>
+                        <div class="card-title">Authentication Flow v2</div>
+                        <div class="card-tags">
+                            <span class="tag">auth</span>
+                            <span class="tag">security</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-11</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card">
+                        <div class="card-header">
+                            <span class="card-id">#F3892</span>
+                            <span class="card-priority priority-medium">MEDIUM</span>
+                        </div>
+                        <div class="card-title">Real-time Dashboard Updates</div>
+                        <div class="card-tags">
+                            <span class="tag">websocket</span>
+                            <span class="tag">frontend</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-08</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card">
+                        <div class="card-header">
+                            <span class="card-id">#F3893</span>
+                            <span class="card-priority priority-low">LOW</span>
+                        </div>
+                        <div class="card-title">Image Optimization Pipeline</div>
+                        <div class="card-tags">
+                            <span class="tag">media</span>
+                            <span class="tag">optimization</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-14</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column: COMPLETED -->
+            <div class="board-column">
+                <div class="column-header">
+                    <div class="column-title">
+                        <span class="column-icon">◉</span>
+                        <span>COMPLETED</span>
+                    </div>
+                    <div class="column-count">6</div>
+                </div>
+                <div class="column-content">
+                    <div class="board-card card-completed">
+                        <div class="card-header">
+                            <span class="card-id">#A1642</span>
+                            <span class="card-status">✓ DONE</span>
+                        </div>
+                        <div class="card-title">Load Balancer Configuration</div>
+                        <div class="card-tags">
+                            <span class="tag">devops</span>
+                            <span class="tag">infrastructure</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-02</span>
+                            <span class="card-completed-time">2h ago</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card card-completed">
+                        <div class="card-header">
+                            <span class="card-id">#A1643</span>
+                            <span class="card-status">✓ DONE</span>
+                        </div>
+                        <div class="card-title">User Feedback System</div>
+                        <div class="card-tags">
+                            <span class="tag">frontend</span>
+                            <span class="tag">UX</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-05</span>
+                            <span class="card-completed-time">4h ago</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card card-completed">
+                        <div class="card-header">
+                            <span class="card-id">#A1644</span>
+                            <span class="card-status">✓ DONE</span>
+                        </div>
+                        <div class="card-title">Database Migration Scripts</div>
+                        <div class="card-tags">
+                            <span class="tag">database</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-10</span>
+                            <span class="card-completed-time">5h ago</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card card-completed">
+                        <div class="card-header">
+                            <span class="card-id">#A1645</span>
+                            <span class="card-status">✓ DONE</span>
+                        </div>
+                        <div class="card-title">API Rate Limiting</div>
+                        <div class="card-tags">
+                            <span class="tag">backend</span>
+                            <span class="tag">security</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-13</span>
+                            <span class="card-completed-time">1d ago</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card card-completed">
+                        <div class="card-header">
+                            <span class="card-id">#A1646</span>
+                            <span class="card-status">✓ DONE</span>
+                        </div>
+                        <div class="card-title">Mobile Responsive Layout</div>
+                        <div class="card-tags">
+                            <span class="tag">frontend</span>
+                            <span class="tag">mobile</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-07</span>
+                            <span class="card-completed-time">1d ago</span>
+                        </div>
+                    </div>
+
+                    <div class="board-card card-completed">
+                        <div class="card-header">
+                            <span class="card-id">#A1647</span>
+                            <span class="card-status">✓ DONE</span>
+                        </div>
+                        <div class="card-title">Logging Infrastructure</div>
+                        <div class="card-tags">
+                            <span class="tag">devops</span>
+                            <span class="tag">monitoring</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-assignee">◉ Agent-16</span>
+                            <span class="card-completed-time">2d ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

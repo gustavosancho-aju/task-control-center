@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS Protocol - Task Control Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Scanline Effect -->
+    <div class="scanlines"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <span class="logo-bracket">[</span>
+                <span class="logo-text">NEXUS</span>
+                <span class="logo-bracket">]</span>
+                <span class="logo-protocol">PROTOCOL</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link active">
+                    <span class="nav-icon">▣</span> DASHBOARD
+                </a>
+                <a href="board.html" class="nav-link">
+                    <span class="nav-icon">▦</span> TASK BOARD
+                </a>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">SYSTEM ONLINE</span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="main-dashboard">
+        <div class="container">
+            <!-- System Time -->
+            <div class="system-time">
+                <span class="time-label">SYSTEM TIME:</span>
+                <span class="time-value" id="systemTime">00:00:00</span>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">◈</div>
+                    <div class="stat-content">
+                        <div class="stat-label">TOTAL TASKS</div>
+                        <div class="stat-value" data-target="47">0</div>
+                    </div>
+                    <div class="stat-glow"></div>
+                </div>
+
+                <div class="stat-card stat-active">
+                    <div class="stat-icon">◉</div>
+                    <div class="stat-content">
+                        <div class="stat-label">ACTIVE PROCESSES</div>
+                        <div class="stat-value" data-target="8">0</div>
+                    </div>
+                    <div class="stat-glow"></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">◎</div>
+                    <div class="stat-content">
+                        <div class="stat-label">COMPLETED</div>
+                        <div class="stat-value" data-target="32">0</div>
+                    </div>
+                    <div class="stat-glow"></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">◇</div>
+                    <div class="stat-content">
+                        <div class="stat-label">EFFICIENCY</div>
+                        <div class="stat-value" data-target="94">0</div>
+                        <span class="stat-unit">%</span>
+                    </div>
+                    <div class="stat-glow"></div>
+                </div>
+            </div>
+
+            <!-- Active Tasks Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="title-bracket">{'</span>
+                    ACTIVE PROCESSES
+                    <span class="title-bracket">'}</span>
+                </h2>
+
+                <div class="active-tasks-grid">
+                    <div class="task-card task-executing">
+                        <div class="task-header">
+                            <div class="task-id">#A2847</div>
+                            <div class="task-status">EXECUTING</div>
+                        </div>
+                        <div class="task-title">Neural Network Training - Phase 3</div>
+                        <div class="task-meta">
+                            <span class="task-priority priority-high">HIGH PRIORITY</span>
+                            <span class="task-time">Runtime: 00:42:18</span>
+                        </div>
+                        <div class="task-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 67%"></div>
+                            </div>
+                            <span class="progress-text">67%</span>
+                        </div>
+                    </div>
+
+                    <div class="task-card task-executing">
+                        <div class="task-header">
+                            <div class="task-id">#B1923</div>
+                            <div class="task-status">EXECUTING</div>
+                        </div>
+                        <div class="task-title">Database Synchronization</div>
+                        <div class="task-meta">
+                            <span class="task-priority priority-medium">MEDIUM</span>
+                            <span class="task-time">Runtime: 00:15:33</span>
+                        </div>
+                        <div class="task-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 34%"></div>
+                            </div>
+                            <span class="progress-text">34%</span>
+                        </div>
+                    </div>
+
+                    <div class="task-card task-executing">
+                        <div class="task-header">
+                            <div class="task-id">#C0451</div>
+                            <div class="task-status">EXECUTING</div>
+                        </div>
+                        <div class="task-title">Security Protocol Update</div>
+                        <div class="task-meta">
+                            <span class="task-priority priority-critical">CRITICAL</span>
+                            <span class="task-time">Runtime: 01:28:04</span>
+                        </div>
+                        <div class="task-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 89%"></div>
+                            </div>
+                            <span class="progress-text">89%</span>
+                        </div>
+                    </div>
+
+                    <div class="task-card task-executing">
+                        <div class="task-header">
+                            <div class="task-id">#D7182</div>
+                            <div class="task-status">EXECUTING</div>
+                        </div>
+                        <div class="task-title">API Gateway Deployment</div>
+                        <div class="task-meta">
+                            <span class="task-priority priority-medium">MEDIUM</span>
+                            <span class="task-time">Runtime: 00:08:47</span>
+                        </div>
+                        <div class="task-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 12%"></div>
+                            </div>
+                            <span class="progress-text">12%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="title-bracket">{'</span>
+                    SYSTEM LOG
+                    <span class="title-bracket">'}</span>
+                </h2>
+
+                <div class="activity-log">
+                    <div class="log-entry">
+                        <span class="log-time">14:32:18</span>
+                        <span class="log-status log-success">✓</span>
+                        <span class="log-message">Task #A1642 completed successfully</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:28:05</span>
+                        <span class="log-status log-info">→</span>
+                        <span class="log-message">Task #C0451 initiated security protocol</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:15:33</span>
+                        <span class="log-status log-success">✓</span>
+                        <span class="log-message">Database backup completed</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:08:22</span>
+                        <span class="log-status log-warning">!</span>
+                        <span class="log-message">High CPU usage detected on node-3</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">13:57:41</span>
+                        <span class="log-status log-info">→</span>
+                        <span class="log-message">New task #D7182 added to queue</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">13:42:09</span>
+                        <span class="log-status log-success">✓</span>
+                        <span class="log-message">System optimization completed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
