@@ -66,7 +66,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { taskId, agentId } = body
+    const { taskId, agentId, manual } = body as {
+      taskId: string
+      agentId: string
+      manual?: boolean  // true = agente externo, cria com RUNNING sem acionar o engine
+    }
 
     if (!taskId || !agentId) {
       return NextResponse.json(
@@ -90,6 +94,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Agente está inativo' }, { status: 400 })
     }
 
+    // Modo manual: cria execução com RUNNING diretamente (agente externo controla o ciclo)
+    if (manual) {
+      const execution = await prisma.agentExecution.create({
+        data: {
+          taskId,
+          agentId,
+          status: 'RUNNING',
+          startedAt: new Date(),
+          progress: 0,
+        },
+        include: {
+          task: { select: { id: true, title: true, status: true } },
+          agent: { select: { id: true, name: true, role: true } },
+        },
+      })
+
+      logExecutionAction(execution.id, "EXECUTE", {
+        taskId: { from: null, to: taskId },
+        agentId: { from: null, to: agentId },
+        status: { from: null, to: 'RUNNING' },
+      })
+
+      return NextResponse.json({ success: true, data: { execution } }, { status: 201 })
+    }
+
+    // Modo engine: executa imediatamente via executionEngine
     ensureCapabilities()
 
     const result = await executionEngine.executeTask(taskId, agentId)

@@ -43,11 +43,41 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
     const body = await request.json()
-    const { action } = body as { action: 'pause' | 'resume' | 'cancel' }
+    const { action, status, progress } = body as {
+      action?: 'pause' | 'resume' | 'cancel'
+      status?: 'RUNNING' | 'COMPLETED' | 'FAILED' | 'CANCELLED'
+      progress?: number
+    }
 
+    // Modo manual: atualiza status/progress diretamente no banco (agentes externos)
+    if (!action && (status || progress !== undefined)) {
+      const updateData: Record<string, unknown> = { updatedAt: new Date() }
+      if (status) updateData.status = status
+      if (progress !== undefined) updateData.progress = Math.min(100, Math.max(0, progress))
+      if (status === 'RUNNING' && !updateData.startedAt) updateData.startedAt = new Date()
+      if (status === 'COMPLETED' || status === 'FAILED' || status === 'CANCELLED') {
+        updateData.completedAt = new Date()
+        if (progress === undefined) updateData.progress = status === 'COMPLETED' ? 100 : updateData.progress
+      }
+
+      const execution = await prisma.agentExecution.update({
+        where: { id },
+        data: updateData,
+        include: {
+          task: { select: { id: true, title: true, status: true } },
+          agent: { select: { id: true, name: true, role: true } },
+        },
+      })
+
+      logExecutionAction(id, "UPDATE", { status: { from: null, to: status ?? 'updated' } })
+
+      return NextResponse.json({ success: true, data: execution })
+    }
+
+    // Modo engine: ações pause/resume/cancel
     if (!action || !['pause', 'resume', 'cancel'].includes(action)) {
       return NextResponse.json(
-        { success: false, error: 'Ação inválida. Use: pause, resume ou cancel' },
+        { success: false, error: 'Forneça action (pause|resume|cancel) ou status/progress para atualização manual' },
         { status: 400 }
       )
     }

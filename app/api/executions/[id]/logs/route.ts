@@ -121,3 +121,42 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: false, error: 'Erro ao buscar logs' }, { status: 500 })
   }
 }
+
+export async function POST(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id } = await params
+    const body = await request.json()
+    const { message, level = 'INFO', data } = body as {
+      message: string
+      level?: LogLevel
+      data?: Record<string, unknown>
+    }
+
+    if (!message) {
+      return NextResponse.json({ success: false, error: 'message é obrigatório' }, { status: 400 })
+    }
+
+    const execution = await prisma.agentExecution.findUnique({
+      where: { id },
+      select: { id: true },
+    })
+
+    if (!execution) {
+      return NextResponse.json({ success: false, error: 'Execução não encontrada' }, { status: 404 })
+    }
+
+    const log = await prisma.executionLog.create({
+      data: {
+        executionId: id,
+        level: level as LogLevel,
+        message,
+        data: data ?? undefined,
+      },
+    })
+
+    return NextResponse.json({ success: true, data: log }, { status: 201 })
+  } catch (error) {
+    console.error('POST /api/executions/[id]/logs error:', error)
+    return NextResponse.json({ success: false, error: 'Erro ao criar log' }, { status: 500 })
+  }
+}
