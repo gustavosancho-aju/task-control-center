@@ -14,40 +14,53 @@ model Task {
   id          String   @id @default(cuid())
   title       String
   description String?  @db.Text
-  
+
   // Status da tarefa
   status      TaskStatus @default(TODO)
-  
+
   // Prioridade
   priority    TaskPriority @default(MEDIUM)
-  
+
   // Agente responsável
   agentName   String?
   agentId     String?
   agent       Agent?   @relation(fields: [agentId], references: [id])
-  
+
   // Datas
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   dueDate     DateTime?
   completedAt DateTime?
-  
+
   // Estimativas
   estimatedHours Float?
   actualHours    Float?
-  
+
   // Relação com subtarefas
   parentId    String?
   parent      Task?    @relation("SubTasks", fields: [parentId], references: [id])
   subtasks    Task[]   @relation("SubTasks")
-  
+
   // Histórico de mudanças
   statusHistory StatusChange[]
-  
+
+  // Execuções de agentes
+  executions    AgentExecution[]
+
+  // Tags (many-to-many)
+  tags        Tag[]
+
+  // Comentários
+  comments    Comment[]
+
+  // Anexos
+  attachments Attachment[]
+
   @@index([status])
   @@index([priority])
   @@index([createdAt])
   @@index([agentId])
+  @@index([status, priority])
 }
 
 // ============================================
@@ -58,24 +71,132 @@ model Agent {
   name        String   @unique
   role        AgentRole
   description String?  @db.Text
-  
+
   // Capacidades
   skills      String[]
-  
+
   // Status
   isActive    Boolean  @default(true)
-  
+
   // Métricas
   tasksCompleted Int @default(0)
   successRate    Float @default(0)
-  
+
   // Relações
   tasks       Task[]
-  
+  executions  AgentExecution[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   @@index([role])
+}
+
+// ============================================
+// TAGS
+// ============================================
+model Tag {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  color       String
+  description String?
+  tasks       Task[]
+  createdAt   DateTime @default(now())
+
+  @@index([name])
+}
+
+// ============================================
+// COMENTÁRIOS
+// ============================================
+model Comment {
+  id          String     @id @default(cuid())
+  taskId      String
+  task        Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  content     String     @db.Text
+  authorName  String     @default("Usuário")
+  authorType  AuthorType @default(USER)
+  parentId    String?
+  parent      Comment?   @relation("CommentReplies", fields: [parentId], references: [id])
+  replies     Comment[]  @relation("CommentReplies")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([taskId])
+  @@index([parentId])
+}
+
+// ============================================
+// ANEXOS
+// ============================================
+model Attachment {
+  id           String   @id @default(cuid())
+  taskId       String
+  task         Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  uploadedBy   String   @default("Usuário")
+  createdAt    DateTime @default(now())
+
+  @@index([taskId])
+}
+
+// ============================================
+// TEMPLATES DE TAREFA
+// ============================================
+model TaskTemplate {
+  id                 String       @id @default(cuid())
+  name               String
+  description        String?
+  defaultTitle       String
+  defaultDescription String?      @db.Text
+  defaultPriority    TaskPriority
+  defaultAgentRole   AgentRole?
+  defaultTags        String[]
+  subtaskTemplates   Json?
+  isActive           Boolean      @default(true)
+  usageCount         Int          @default(0)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@index([name])
+}
+
+// ============================================
+// LOG DE AUDITORIA
+// ============================================
+model AuditLog {
+  id          String      @id @default(cuid())
+  entityType  String
+  entityId    String
+  action      AuditAction
+  changes     Json?
+  performedBy String      @default("Usuário")
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime    @default(now())
+
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ============================================
+// PREFERÊNCIAS DO USUÁRIO
+// ============================================
+model UserPreferences {
+  id              String   @id @default(cuid())
+  userId          String   @unique @default("default")
+  theme           String   @default("light")
+  language        String   @default("pt-BR")
+  notifications   Json
+  dashboardLayout Json?
+  defaultView     String   @default("grid")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 // ============================================
@@ -85,15 +206,92 @@ model StatusChange {
   id          String   @id @default(cuid())
   taskId      String
   task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  
+
   fromStatus  TaskStatus?
   toStatus    TaskStatus
-  
+
   changedAt   DateTime @default(now())
   notes       String?  @db.Text
-  
+
   @@index([taskId])
   @@index([changedAt])
+}
+
+// ============================================
+// EXECUÇÃO DE AGENTES
+// ============================================
+model AgentExecution {
+  id          String          @id @default(cuid())
+  taskId      String
+  task        Task            @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  agentId     String
+  agent       Agent           @relation(fields: [agentId], references: [id])
+  status      ExecutionStatus @default(QUEUED)
+  startedAt   DateTime?
+  completedAt DateTime?
+  result      String?         @db.Text
+  error       String?         @db.Text
+  logs        ExecutionLog[]
+  feedback    ExecutionFeedback?
+  progress    Int             @default(0)
+  metadata    Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([taskId])
+  @@index([agentId])
+  @@index([status])
+}
+
+// ============================================
+// FEEDBACK DE EXECUÇÃO
+// ============================================
+model ExecutionFeedback {
+  id           String         @id @default(cuid())
+  executionId  String         @unique
+  execution    AgentExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  rating       Int            // 1-5
+  wasAccepted  Boolean
+  comments     String?        @db.Text
+  improvements String[]
+  createdAt    DateTime       @default(now())
+
+  @@index([executionId])
+}
+
+// ============================================
+// LOGS DE EXECUÇÃO
+// ============================================
+model ExecutionLog {
+  id          String         @id @default(cuid())
+  executionId String
+  execution   AgentExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  level       LogLevel
+  message     String         @db.Text
+  data        Json?
+  createdAt   DateTime       @default(now())
+
+  @@index([executionId])
+  @@index([level])
+}
+
+// ============================================
+// FILA DE AGENTES
+// ============================================
+model AgentQueue {
+  id           String      @id @default(cuid())
+  taskId       String      @unique
+  agentId      String
+  priority     Int         @default(0)
+  scheduledFor DateTime?
+  attempts     Int         @default(0)
+  maxAttempts  Int         @default(3)
+  status       QueueStatus @default(PENDING)
+  createdAt    DateTime    @default(now())
+
+  @@index([status])
+  @@index([priority])
+  @@index([scheduledFor])
 }
 
 // ============================================
@@ -119,4 +317,44 @@ enum AgentRole {
   SENTINEL     // Revisor/Qualidade
   ARCHITECTON  // Arquiteto
   PIXEL        // Designer
+}
+
+enum ExecutionStatus {
+  QUEUED
+  RUNNING
+  PAUSED
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum LogLevel {
+  INFO
+  WARNING
+  ERROR
+  DEBUG
+}
+
+enum QueueStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum AuthorType {
+  USER
+  AGENT
+  SYSTEM
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  EXECUTE
+  ASSIGN
+  COMPLETE
+  COMMENT
+  UPLOAD
 }

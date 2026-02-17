@@ -9,15 +9,17 @@ interface Task {
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
   createdAt: string
   agent?: { id: string; name: string; role: "MAESTRO" | "SENTINEL" | "ARCHITECTON" | "PIXEL" } | null
+  agentId?: string | null
 }
 
 interface TaskListProps {
   tasks: Task[]
   onStatusChange?: (taskId: string, newStatus: string) => void
   onSelect?: (taskId: string) => void
+  onAutoAssign?: (taskId: string) => void
 }
 
-export function TaskList({ tasks, onStatusChange, onSelect }: TaskListProps) {
+export function TaskList({ tasks, onStatusChange, onSelect, onAutoAssign }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -35,6 +37,7 @@ export function TaskList({ tasks, onStatusChange, onSelect }: TaskListProps) {
           task={task}
           onStatusChange={onStatusChange}
           onSelect={onSelect}
+          onAutoAssign={onAutoAssign}
         />
       ))}
     </div>

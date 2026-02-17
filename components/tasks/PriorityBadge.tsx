@@ -1,19 +1,17 @@
 import { Badge } from "@/components/ui/badge"
+import { PRIORITY_COLORS, type TaskPriority } from "@/lib/colors"
 
-const priorityConfig = {
-  LOW: { label: "Baixa", className: "bg-slate-400 text-white" },
-  MEDIUM: { label: "Media", className: "bg-blue-400 text-white" },
-  HIGH: { label: "Alta", className: "bg-orange-500 text-white" },
-  URGENT: { label: "Urgente", className: "bg-red-600 text-white" },
+const priorityLabels: Record<TaskPriority, string> = {
+  LOW: "Baixa",
+  MEDIUM: "Media",
+  HIGH: "Alta",
+  URGENT: "Urgente",
 }
 
-type TaskPriority = keyof typeof priorityConfig
-
 export function PriorityBadge({ priority }: { priority: TaskPriority }) {
-  const config = priorityConfig[priority]
   return (
-    <Badge className={config.className}>
-      {config.label}
+    <Badge className={PRIORITY_COLORS[priority].badge}>
+      {priorityLabels[priority]}
     </Badge>
   )
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { CreateTaskSchema, TaskQuerySchema } from '@/lib/utils/validators'
 import { TaskStatus } from '@prisma/client'
+import { logTaskCreate } from '@/lib/audit/logger'
+import { cache } from '@/lib/cache'
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,6 +16,12 @@ export async function GET(request: NextRequest) {
       limit: searchParams.get('limit') || undefined,
       offset: searchParams.get('offset') || undefined,
     })
+
+    const cacheKey = `tasks:${JSON.stringify(query)}`
+    const cached = cache.get<{ data: unknown; pagination: unknown }>(cacheKey)
+    if (cached) {
+      return NextResponse.json({ success: true, ...cached })
+    }
 
     const where: any = {}
     if (query.status) where.status = query.status
@@ -29,10 +37,23 @@ export async function GET(request: NextRequest) {
     const [tasks, total] = await Promise.all([
       prisma.task.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          priority: true,
+          agentName: true,
+          agentId: true,
+          createdAt: true,
+          updatedAt: true,
+          dueDate: true,
+          completedAt: true,
+          estimatedHours: true,
+          actualHours: true,
+          parentId: true,
           agent: { select: { id: true, name: true, role: true } },
           subtasks: { select: { id: true, title: true, status: true } },
-          _count: { select: { statusHistory: true } }
+          _count: { select: { statusHistory: true } },
         },
         orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
         take: query.limit,
@@ -41,11 +62,14 @@ export async function GET(request: NextRequest) {
       prisma.task.count({ where }),
     ])
 
-    return NextResponse.json({
-      success: true,
+    const result = {
       data: tasks,
-      pagination: { total, limit: query.limit, offset: query.offset, hasMore: query.offset + tasks.length < total }
-    })
+      pagination: { total, limit: query.limit, offset: query.offset, hasMore: query.offset + tasks.length < total },
+    }
+
+    cache.set(cacheKey, result, 30)
+
+    return NextResponse.json({ success: true, ...result })
   } catch (error) {
     console.error('GET /api/tasks error:', error)
     return NextResponse.json({ success: false, error: 'Erro ao buscar tarefas' }, { status: 500 })
@@ -71,6 +95,9 @@ export async function POST(request: NextRequest) {
       },
       include: { agent: true, statusHistory: true }
     })
+
+    logTaskCreate(task.id, task.title)
+    cache.invalidatePattern('tasks:*')
 
     return NextResponse.json({ success: true, data: task }, { status: 201 })
   } catch (error) {

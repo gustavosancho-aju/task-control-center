@@ -1,20 +1,26 @@
 import { Badge } from "@/components/ui/badge"
+import { STATUS_COLORS, type TaskStatus } from "@/lib/colors"
 
-const statusConfig = {
-  TODO: { label: "A Fazer", variant: "secondary" as const, className: "bg-slate-500" },
-  IN_PROGRESS: { label: "Em Progresso", variant: "default" as const, className: "bg-blue-500" },
-  REVIEW: { label: "Em Revisao", variant: "default" as const, className: "bg-yellow-500" },
-  DONE: { label: "Concluido", variant: "default" as const, className: "bg-green-500" },
-  BLOCKED: { label: "Bloqueado", variant: "destructive" as const, className: "bg-red-500" },
+const statusLabels: Record<TaskStatus, string> = {
+  TODO: "A Fazer",
+  IN_PROGRESS: "Em Progresso",
+  REVIEW: "Em Revisao",
+  DONE: "Concluido",
+  BLOCKED: "Bloqueado",
 }
 
-type TaskStatus = keyof typeof statusConfig
+const statusVariants: Record<TaskStatus, "secondary" | "default" | "destructive"> = {
+  TODO: "secondary",
+  IN_PROGRESS: "default",
+  REVIEW: "default",
+  DONE: "default",
+  BLOCKED: "destructive",
+}
 
 export function StatusBadge({ status }: { status: TaskStatus }) {
-  const config = statusConfig[status]
   return (
-    <Badge variant={config.variant} className={config.className}>
-      {config.label}
+    <Badge variant={statusVariants[status]} className={STATUS_COLORS[status].badge}>
+      {statusLabels[status]}
     </Badge>
   )
 }

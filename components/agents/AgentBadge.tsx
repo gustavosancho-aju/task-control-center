@@ -1,13 +1,12 @@
 import { Badge } from "@/components/ui/badge"
+import { ROLE_COLORS, type AgentRole } from "@/lib/colors"
 
-const agentConfig = {
-  MAESTRO: { icon: "🎯", className: "bg-purple-500 text-white" },
-  SENTINEL: { icon: "🛡️", className: "bg-green-600 text-white" },
-  ARCHITECTON: { icon: "🏗️", className: "bg-blue-600 text-white" },
-  PIXEL: { icon: "🎨", className: "bg-pink-500 text-white" },
+const agentIcons: Record<AgentRole, string> = {
+  MAESTRO: "🎯",
+  SENTINEL: "🛡️",
+  ARCHITECTON: "🏗️",
+  PIXEL: "🎨",
 }
-
-type AgentRole = keyof typeof agentConfig
 
 interface AgentBadgeProps {
   name: string
@@ -15,10 +14,9 @@ interface AgentBadgeProps {
 }
 
 export function AgentBadge({ name, role }: AgentBadgeProps) {
-  const config = agentConfig[role]
   return (
-    <Badge className={config.className}>
-      {config.icon} {name}
+    <Badge className={ROLE_COLORS[role].badge}>
+      {agentIcons[role]} {name}
     </Badge>
   )
 }

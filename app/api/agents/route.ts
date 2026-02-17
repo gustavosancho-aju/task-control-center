@@ -1,15 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { CreateAgentSchema } from '@/lib/utils/validators'
+import { cache } from '@/lib/cache'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const activeOnly = searchParams.get('active') !== 'false'
 
+    const cacheKey = `agents:${activeOnly}`
+    const cached = cache.get<unknown>(cacheKey)
+    if (cached) {
+      return NextResponse.json({ success: true, data: cached })
+    }
+
     const agents = await prisma.agent.findMany({
       where: activeOnly ? { isActive: true } : undefined,
-      include: { _count: { select: { tasks: true } } },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        description: true,
+        skills: true,
+        isActive: true,
+        tasksCompleted: true,
+        successRate: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: { select: { tasks: true } },
+      },
       orderBy: { name: 'asc' },
     })
 
@@ -29,6 +48,8 @@ export async function GET(request: NextRequest) {
         }
       })
     )
+
+    cache.set(cacheKey, agentsWithStats, 300)
 
     return NextResponse.json({ success: true, data: agentsWithStats })
   } catch (error) {
@@ -50,6 +71,8 @@ export async function POST(request: NextRequest) {
     const agent = await prisma.agent.create({
       data: { name: data.name, role: data.role, description: data.description, skills: data.skills },
     })
+
+    cache.invalidatePattern('agents:*')
 
     return NextResponse.json({ success: true, data: agent }, { status: 201 })
   } catch (error) {

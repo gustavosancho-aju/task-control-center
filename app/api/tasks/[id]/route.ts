@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { UpdateTaskSchema } from '@/lib/utils/validators'
 import { TaskStatus } from '@prisma/client'
+import { logTaskUpdate, logTaskDelete, logStatusChange, logTaskComplete } from '@/lib/audit/logger'
+import { cache } from '@/lib/cache'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
 const VALID_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
-  TODO: ['IN_PROGRESS', 'BLOCKED'],
-  IN_PROGRESS: ['REVIEW', 'BLOCKED', 'TODO'],
+  TODO: ['IN_PROGRESS', 'BLOCKED', 'DONE'],
+  IN_PROGRESS: ['REVIEW', 'BLOCKED', 'TODO', 'DONE'],
   REVIEW: ['DONE', 'IN_PROGRESS', 'BLOCKED'],
-  DONE: [],
+  DONE: ['TODO'],
   BLOCKED: ['TODO', 'IN_PROGRESS'],
 }
 
@@ -62,6 +64,19 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           allowedTransitions: VALID_TRANSITIONS[currentTask.status],
         }, { status: 400 })
       }
+
+      // Business rule: parent task can only be DONE if all subtasks are DONE
+      if (data.status === 'DONE') {
+        const pendingSubtasks = await prisma.task.count({
+          where: { parentId: id, status: { not: 'DONE' } },
+        })
+        if (pendingSubtasks > 0) {
+          return NextResponse.json({
+            success: false,
+            error: `Não é possível concluir: ${pendingSubtasks} subtarefa${pendingSubtasks > 1 ? 's' : ''} ainda não concluída${pendingSubtasks > 1 ? 's' : ''}`,
+          }, { status: 400 })
+        }
+      }
     }
 
     const updateData: any = { ...data }
@@ -73,7 +88,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const task = await prisma.task.update({
       where: { id },
       data: updateData,
-      include: { agent: true, statusHistory: { orderBy: { changedAt: 'desc' }, take: 5 } },
+      include: { agent: true, statusHistory: { orderBy: { changedAt: 'desc' }, take: 20 } },
     })
 
     if (data.status && data.status !== currentTask.status) {
@@ -85,7 +100,24 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           notes: `Status alterado de ${currentTask.status} para ${data.status}`,
         },
       })
+
+      logStatusChange(id, currentTask.status, data.status)
+
+      if (data.status === 'DONE') {
+        logTaskComplete(id, task.title)
+      }
     }
+
+    // Log non-status field changes
+    const fieldChanges: Record<string, { from: unknown; to: unknown }> = {}
+    if (data.title && data.title !== task.title) fieldChanges.title = { from: task.title, to: data.title }
+    if (data.priority) fieldChanges.priority = { from: currentTask.status, to: data.priority }
+    if (data.description !== undefined) fieldChanges.description = { from: "...", to: "..." }
+    if (Object.keys(fieldChanges).length > 0 && !data.status) {
+      logTaskUpdate(id, fieldChanges)
+    }
+
+    cache.invalidatePattern('tasks:*')
 
     return NextResponse.json({ success: true, data: task })
   } catch (error) {
@@ -101,7 +133,18 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     if (!task) {
       return NextResponse.json({ success: false, error: 'Tarefa nao encontrada' }, { status: 404 })
     }
+
+    // Get task title before deletion for audit
+    const taskDetails = await prisma.task.findUnique({ where: { id }, select: { title: true } })
+
+    // Delete subtasks first (cascade)
+    await prisma.task.deleteMany({ where: { parentId: id } })
+
     await prisma.task.delete({ where: { id } })
+
+    logTaskDelete(id, taskDetails?.title || "")
+    cache.invalidatePattern('tasks:*')
+
     return NextResponse.json({ success: true, message: 'Tarefa deletada com sucesso' })
   } catch (error) {
     console.error('DELETE /api/tasks/[id] error:', error)
