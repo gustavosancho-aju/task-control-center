@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
+import { Prisma } from '@prisma/client'
 import type { LogLevel } from '@prisma/client'
 
 type RouteParams = { params: Promise<{ id: string }> }
@@ -150,7 +151,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         executionId: id,
         level: level as LogLevel,
         message,
-        data: data ?? undefined,
+        data: data !== undefined ? (data as Prisma.InputJsonValue) : undefined,
       },
     })
 
