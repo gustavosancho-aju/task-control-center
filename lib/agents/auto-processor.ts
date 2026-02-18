@@ -15,6 +15,7 @@ export interface ProcessorStatus {
   processed: number
   errors: number
   lastError: string | null
+  serverless: boolean
 }
 
 // ============================================================================
@@ -23,6 +24,14 @@ export interface ProcessorStatus {
 
 const DEFAULT_INTERVAL = parseInt(process.env.AUTO_PROCESS_INTERVAL ?? '30', 10)
 const AUTO_ENABLED = process.env.AUTO_PROCESS_ENABLED !== 'false'
+
+/**
+ * Vercel sets VERCEL=1 automatically on all deployments.
+ * In serverless environments, setInterval is unreliable because the Node.js
+ * process is frozen/killed between requests — use the /api/processor/tick
+ * endpoint (triggered by a cron job) to process the queue instead.
+ */
+const IS_SERVERLESS = !!process.env.VERCEL
 
 class AutoProcessor {
   private timer: ReturnType<typeof setInterval> | null = null
@@ -43,9 +52,14 @@ class AutoProcessor {
   }
 
   /**
-   * Inicia o loop de processamento automático.
+   * Inicia o loop de processamento automático via setInterval.
+   * Não tem efeito em ambientes serverless (Vercel) — use tick() via cron.
    */
   start(): void {
+    if (IS_SERVERLESS) {
+      console.log('[AutoProcessor] Ambiente serverless detectado — use /api/processor/tick via cron externo')
+      return
+    }
     if (this._running) return
 
     this._running = true
@@ -78,6 +92,7 @@ class AutoProcessor {
   /**
    * Processa a próxima tarefa pendente na fila.
    * Retorna true se processou algo, false se a fila estava vazia.
+   * Pode ser chamado diretamente em ambientes serverless via /api/processor/tick.
    */
   async processNext(): Promise<boolean> {
     const now = new Date()
@@ -151,6 +166,38 @@ class AutoProcessor {
   }
 
   /**
+   * Executa um ciclo completo de processamento (todas as tarefas pendentes).
+   * Em serverless, é chamado pelo endpoint /api/processor/tick.
+   * Em ambiente local, é chamado pelo setInterval.
+   */
+  async tick(): Promise<{ processed: number; errors: number }> {
+    if (this._processing) return { processed: 0, errors: 0 }
+
+    this._processing = true
+    this._lastCheck = new Date()
+    const before = { processed: this._processed, errors: this._errors }
+
+    try {
+      let hadWork = true
+      while (hadWork && (this._running || IS_SERVERLESS)) {
+        hadWork = await this.processNext()
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      this._errors++
+      this._lastError = errorMessage
+      console.error('[AutoProcessor] Erro no tick:', errorMessage)
+    } finally {
+      this._processing = false
+    }
+
+    return {
+      processed: this._processed - before.processed,
+      errors: this._errors - before.errors,
+    }
+  }
+
+  /**
    * Configura o intervalo de verificação em segundos.
    */
   setInterval(seconds: number): void {
@@ -180,32 +227,7 @@ class AutoProcessor {
       processed: this._processed,
       errors: this._errors,
       lastError: this._lastError,
-    }
-  }
-
-  // --------------------------------------------------------------------------
-  // PRIVATE
-  // --------------------------------------------------------------------------
-
-  private async tick(): Promise<void> {
-    if (this._processing) return // Evita concorrência
-
-    this._processing = true
-    this._lastCheck = new Date()
-
-    try {
-      // Processa todas as tarefas pendentes na fila
-      let hadWork = true
-      while (hadWork && this._running) {
-        hadWork = await this.processNext()
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      this._errors++
-      this._lastError = errorMessage
-      console.error('[AutoProcessor] Erro no tick:', errorMessage)
-    } finally {
-      this._processing = false
+      serverless: IS_SERVERLESS,
     }
   }
 }
@@ -225,8 +247,8 @@ if (process.env.NODE_ENV !== 'production') {
   globalForProcessor.autoProcessor = autoProcessor
 }
 
-// Auto-start se configurado via env
-if (AUTO_ENABLED && !autoProcessor.getStatus().running) {
+// Auto-start apenas em ambientes não-serverless (local/Docker)
+if (AUTO_ENABLED && !IS_SERVERLESS && !autoProcessor.getStatus().running) {
   autoProcessor.start()
 }
 
