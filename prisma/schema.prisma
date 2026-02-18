@@ -41,6 +41,18 @@ model Task {
   parent      Task?    @relation("SubTasks", fields: [parentId], references: [id])
   subtasks    Task[]   @relation("SubTasks")
 
+  // Dependências entre tarefas (many-to-many self-relation)
+  dependsOn   Task[]   @relation("TaskDependencies")
+  dependents  Task[]   @relation("TaskDependencies")
+
+  // Orquestração
+  autoCreated     Boolean        @default(false)
+  orchestrationId String?
+  orchestration   Orchestration? @relation("OrchestrationSubtasks", fields: [orchestrationId], references: [id], onDelete: SetNull)
+
+  // Orquestração da qual esta tarefa é a raiz
+  ownedOrchestration Orchestration? @relation("OrchestrationRoot")
+
   // Histórico de mudanças
   statusHistory StatusChange[]
 
@@ -61,6 +73,7 @@ model Task {
   @@index([createdAt])
   @@index([agentId])
   @@index([status, priority])
+  @@index([orchestrationId])
 }
 
 // ============================================
@@ -295,8 +308,40 @@ model AgentQueue {
 }
 
 // ============================================
+// ORQUESTRAÇÃO
+// ============================================
+model Orchestration {
+  id                String              @id @default(cuid())
+  parentTaskId      String              @unique
+  parentTask        Task                @relation("OrchestrationRoot", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  status            OrchestrationStatus @default(PLANNING)
+  totalSubtasks     Int                 @default(0)
+  completedSubtasks Int                 @default(0)
+  currentPhase      String?
+  plan              Json?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  completedAt       DateTime?
+
+  subtasks          Task[]              @relation("OrchestrationSubtasks")
+
+  @@index([parentTaskId])
+  @@index([status])
+}
+
+// ============================================
 // ENUMS
 // ============================================
+enum OrchestrationStatus {
+  PLANNING
+  CREATING_SUBTASKS
+  ASSIGNING_AGENTS
+  EXECUTING
+  REVIEWING
+  COMPLETED
+  FAILED
+}
+
 enum TaskStatus {
   TODO
   IN_PROGRESS
