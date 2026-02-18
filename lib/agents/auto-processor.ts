@@ -182,6 +182,10 @@ class AutoProcessor {
       while (hadWork && (this._running || IS_SERVERLESS)) {
         hadWork = await this.processNext()
       }
+
+      // Após processar a fila, monitora orquestrações ativas para re-enfileirar
+      // subtasks cujas dependências foram liberadas
+      await this.monitorActiveOrchestrations()
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
       this._errors++
@@ -194,6 +198,27 @@ class AutoProcessor {
     return {
       processed: this._processed - before.processed,
       errors: this._errors - before.errors,
+    }
+  }
+
+  /**
+   * Monitora todas as orquestrações em execução e re-enfileira tasks prontas.
+   */
+  private async monitorActiveOrchestrations(): Promise<void> {
+    try {
+      const activeOrchestrations = await prisma.orchestration.findMany({
+        where: { status: { in: ['EXECUTING', 'CREATING_SUBTASKS', 'ASSIGNING_AGENTS'] } },
+        select: { id: true },
+      })
+
+      if (activeOrchestrations.length === 0) return
+
+      const { maestroOrchestrator } = await import('@/lib/agents/maestro-orchestrator')
+      for (const orch of activeOrchestrations) {
+        await maestroOrchestrator.monitorExecution(orch.id)
+      }
+    } catch (err) {
+      console.warn('[AutoProcessor] monitorActiveOrchestrations error:', err)
     }
   }
 

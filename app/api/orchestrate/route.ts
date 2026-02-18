@@ -51,11 +51,39 @@ export async function POST(request: NextRequest) {
     const result = await maestroOrchestrator.orchestrate(taskId)
 
     // Aciona o AutoProcessor para processar a fila imediatamente (se solicitado)
+    // Usa um loop contínuo que processa todas as subtasks conforme dependências são liberadas
     if (autoExecute) {
       const { autoProcessor } = await import('@/lib/agents/auto-processor')
-      // Fire-and-forget: não bloqueia a resposta
-      autoProcessor.tick().catch((err: unknown) =>
-        console.warn('[orchestrate] AutoProcessor tick error:', err)
+      const orchestrationId = result.orchestrationId
+      // Fire-and-forget: loop que processa tick + monitora até orquestração completar
+      ;(async () => {
+        const MAX_TICKS = 50 // Segurança: máximo de ciclos
+        for (let i = 0; i < MAX_TICKS; i++) {
+          try {
+            await autoProcessor.tick()
+
+            // Verifica se orquestração terminou
+            const orch = await prisma.orchestration.findUnique({
+              where: { id: orchestrationId },
+              select: { status: true },
+            })
+            if (!orch || ['COMPLETED', 'FAILED'].includes(orch.status)) {
+              console.log(`[orchestrate] Orquestração ${orchestrationId} finalizada (${orch?.status})`)
+              break
+            }
+
+            // Monitora e re-enfileira tasks prontas
+            await maestroOrchestrator.monitorExecution(orchestrationId)
+
+            // Aguarda antes do próximo ciclo para dar tempo às execuções
+            await new Promise(resolve => setTimeout(resolve, 3000))
+          } catch (err) {
+            console.warn(`[orchestrate] Tick ${i} error:`, err)
+            break
+          }
+        }
+      })().catch((err: unknown) =>
+        console.warn('[orchestrate] Processing loop error:', err)
       )
     }
 

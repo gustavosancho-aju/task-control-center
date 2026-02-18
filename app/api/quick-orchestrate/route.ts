@@ -53,12 +53,30 @@ export async function POST(request: NextRequest) {
     // ── 2. Iniciar orquestração ───────────────────────────────────────────
     const result = await maestroOrchestrator.orchestrate(task.id)
 
-    // Fire-and-forget: aciona o AutoProcessor sem bloquear a resposta
-    import('@/lib/agents/auto-processor')
-      .then(({ autoProcessor }) => autoProcessor.tick())
-      .catch((err: unknown) =>
-        console.warn('[quick-orchestrate] AutoProcessor tick error:', err)
-      )
+    // Fire-and-forget: loop contínuo que processa + monitora até orquestração completar
+    const orchestrationId = result.orchestrationId
+    ;(async () => {
+      const { autoProcessor } = await import('@/lib/agents/auto-processor')
+      const { maestroOrchestrator: maestro } = await import('@/lib/agents/maestro-orchestrator')
+      const MAX_TICKS = 50
+      for (let i = 0; i < MAX_TICKS; i++) {
+        try {
+          await autoProcessor.tick()
+          const orch = await prisma.orchestration.findUnique({
+            where: { id: orchestrationId },
+            select: { status: true },
+          })
+          if (!orch || ['COMPLETED', 'FAILED'].includes(orch.status)) break
+          await maestro.monitorExecution(orchestrationId)
+          await new Promise(resolve => setTimeout(resolve, 3000))
+        } catch (err) {
+          console.warn(`[quick-orchestrate] Tick ${i} error:`, err)
+          break
+        }
+      }
+    })().catch((err: unknown) =>
+      console.warn('[quick-orchestrate] Processing loop error:', err)
+    )
 
     // ── 3. Retornar resultado ─────────────────────────────────────────────
     const redirectUrl = `/orchestration/${result.orchestrationId}`

@@ -4,6 +4,7 @@ import { CreateTaskSchema, TaskQuerySchema } from '@/lib/utils/validators'
 import { TaskStatus } from '@prisma/client'
 import { logTaskCreate } from '@/lib/audit/logger'
 import { cache } from '@/lib/cache'
+import { maestroOrchestrator } from '@/lib/agents/maestro-orchestrator'
 
 export async function GET(request: NextRequest) {
   try {
@@ -98,6 +99,20 @@ export async function POST(request: NextRequest) {
 
     logTaskCreate(task.id, task.title)
     cache.invalidatePattern('tasks:*')
+
+    // Auto-orquestração: decompõe em subtarefas e inicia processamento imediato
+    if (data.autoOrchestrate) {
+      // Fire-and-forget: não bloqueia a resposta HTTP
+      maestroOrchestrator.orchestrate(task.id)
+        .then(async () => {
+          const { autoProcessor } = await import('@/lib/agents/auto-processor')
+          await autoProcessor.tick()
+          console.log(`[tasks/POST] Auto-orquestração + tick concluídos para "${task.title}"`)
+        })
+        .catch((err: unknown) => {
+          console.error(`[tasks/POST] Auto-orquestração falhou para "${task.title}":`, err)
+        })
+    }
 
     return NextResponse.json({ success: true, data: task }, { status: 201 })
   } catch (error) {

@@ -11,6 +11,7 @@ export const CreateTaskSchema = z.object({
   dueDate: z.string().datetime().optional(),
   estimatedHours: z.number().positive().optional(),
   parentId: z.string().cuid().optional(),
+  autoOrchestrate: z.boolean().optional().default(false),
 })
 
 export const UpdateTaskSchema = z.object({
