@@ -247,6 +247,12 @@ if (process.env.NODE_ENV !== 'production') {
   globalForProcessor.autoProcessor = autoProcessor
 }
 
+// Inicializa o DependencyManager para garantir que o listener de QUEUE_PROCESSED
+// esteja registrado antes do primeiro tick do AutoProcessor
+import('@/lib/agents/dependency-manager').catch(() => {
+  // Silencia erros de import — DependencyManager é opcional
+})
+
 // Auto-start apenas em ambientes não-serverless (local/Docker)
 if (AUTO_ENABLED && !IS_SERVERLESS && !autoProcessor.getStatus().running) {
   autoProcessor.start()

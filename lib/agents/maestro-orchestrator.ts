@@ -4,6 +4,7 @@ import prisma from '@/lib/db'
 import { createClaudeJsonMessage } from '@/lib/ai/claude-client'
 import { queueManager } from '@/lib/agents/queue-manager'
 import { agentEventEmitter, AgentEventTypes } from '@/lib/agents/event-emitter'
+import { dependencyManager } from '@/lib/agents/dependency-manager'
 
 // ============================================================================
 // TYPES
@@ -196,9 +197,20 @@ Formato de resposta (JSON puro):
 
     const plan = await createClaudeJsonMessage<OrchestrationPlan>(prompt, systemPrompt)
 
-    // Valida campos críticos
+    // Valida estrutura básica
     if (!plan.phases || !Array.isArray(plan.phases)) {
       throw new Error('Plano inválido retornado pela IA: campo "phases" ausente ou inválido')
+    }
+
+    // Valida dependências via DependencyManager (ciclos, títulos inexistentes)
+    const validation = dependencyManager.validateDependencies(plan)
+    if (!validation.valid) {
+      throw new Error(
+        `Plano inválido — erros de dependência:\n${validation.errors.join('\n')}`
+      )
+    }
+    if (validation.warnings.length > 0) {
+      console.warn('[Maestro] Avisos do plano:', validation.warnings.join('; '))
     }
 
     return plan
@@ -331,40 +343,26 @@ Formato de resposta (JSON puro):
   // --------------------------------------------------------------------------
 
   async queueForExecution(orchestrationId: string, subtasks: Task[]): Promise<void> {
-    const tasksWithDeps = await prisma.task.findMany({
-      where: { orchestrationId },
-      include: { dependsOn: { select: { id: true, status: true } } },
-    })
+    // Delega ao DependencyManager que sabe quais tasks estão prontas
+    const readyTasks = await dependencyManager.getReadyTasks(orchestrationId)
 
     let queued = 0
-
-    for (const task of tasksWithDeps) {
+    for (const task of readyTasks) {
       if (!task.agentId) {
         console.warn(`[Maestro] Pulando "${task.title}" — sem agente atribuído`)
         continue
       }
-
-      const pendingDeps = task.dependsOn.filter(dep => dep.status !== 'DONE')
-
-      if (pendingDeps.length > 0) {
-        console.log(
-          `[Maestro] "${task.title}" aguarda ${pendingDeps.length} dependência(s)`
-        )
-        continue
-      }
-
-      // Sem dependências pendentes — enfileira imediatamente
-      const existing = await prisma.agentQueue.findUnique({ where: { taskId: task.id } })
-      if (!existing) {
-        await queueManager.addToQueue(task.id, task.agentId, {
-          priority: this._priorityToNumber(task.priority as TaskPriority),
-        })
-        queued++
-        console.log(`[Maestro] Enfileirado (prioridade ${this._priorityToNumber(task.priority as TaskPriority)}): "${task.title}"`)
-      }
+      await queueManager.addToQueue(task.id, task.agentId, {
+        priority: this._priorityToNumber(task.priority as TaskPriority),
+      })
+      queued++
+      console.log(`[Maestro] Enfileirado: "${task.title}"`)
     }
 
-    console.log(`[Maestro] ${queued}/${tasksWithDeps.length} subtarefas enfileiradas`)
+    const totalBlocked = subtasks.length - readyTasks.length
+    console.log(
+      `[Maestro] ${queued} enfileirada(s), ${totalBlocked} aguardando dependências`
+    )
   }
 
   // --------------------------------------------------------------------------
@@ -375,47 +373,36 @@ Formato de resposta (JSON puro):
   async monitorExecution(orchestrationId: string): Promise<void> {
     const orchestration = await prisma.orchestration.findUnique({
       where: { id: orchestrationId },
+      select: { id: true, status: true, parentTaskId: true, totalSubtasks: true },
     })
 
     if (!orchestration) return
     if (['COMPLETED', 'FAILED'].includes(orchestration.status)) return
 
-    const subtasks = await prisma.task.findMany({
-      where: { orchestrationId },
-      include: { dependsOn: { select: { id: true, status: true } } },
-    })
+    // DependencyManager gerencia desbloqueio via eventos QUEUE_PROCESSED.
+    // Aqui sincronizamos contadores e detectamos travamentos.
+    const subtaskIds = await prisma.task
+      .findMany({ where: { orchestrationId }, select: { id: true } })
+      .then(rows => rows.map(r => r.id))
 
-    const total = subtasks.length
-    const done = subtasks.filter(t => t.status === 'DONE').length
+    const [total, done, inQueue] = await Promise.all([
+      Promise.resolve(subtaskIds.length),
+      prisma.task.count({ where: { orchestrationId, status: 'DONE' } }),
+      prisma.agentQueue.count({
+        where: {
+          taskId: { in: subtaskIds },
+          status: { in: ['PENDING', 'PROCESSING'] },
+        },
+      }),
+    ])
 
-    // Desbloqueia tarefas cujas dependências foram concluídas
-    let unlocked = 0
-    for (const task of subtasks) {
-      if (task.status !== 'TODO') continue
-
-      const allDepsDone = task.dependsOn.every(dep => dep.status === 'DONE')
-      if (!allDepsDone) continue
-      if (!task.agentId) continue
-
-      const existing = await prisma.agentQueue.findUnique({ where: { taskId: task.id } })
-      if (!existing) {
-        await queueManager.addToQueue(task.id, task.agentId, {
-          priority: this._priorityToNumber(task.priority as TaskPriority),
-        })
-        unlocked++
-        console.log(`[Maestro] Desbloqueado: "${task.title}"`)
-      }
-    }
-
-    // Atualiza contadores e fase
     await this._updateOrchestration(orchestrationId, {
       completedSubtasks: done,
-      currentPhase: `${done}/${total} subtarefas concluídas${unlocked > 0 ? ` (+${unlocked} desbloqueadas)` : ''}`,
+      currentPhase: `${done}/${total} subtarefas concluídas`,
       updatedAt: new Date(),
     })
 
-    // Verifica conclusão
-    if (done === total) {
+    if (done === total && total > 0) {
       await this._updateOrchestration(orchestrationId, {
         status: 'COMPLETED',
         completedSubtasks: total,
@@ -423,28 +410,27 @@ Formato de resposta (JSON puro):
         currentPhase: `Todas as ${total} subtarefas concluídas`,
       })
       console.log(`[Maestro] ✅ Orquestração ${orchestrationId} CONCLUÍDA`)
-
       agentEventEmitter.emit(AgentEventTypes.EXECUTION_COMPLETED, {}, {
         taskId: orchestration.parentTaskId,
       })
       return
     }
 
-    // Verifica se parou de progredir (todas em TODO sem agente — falha estrutural)
-    const todo = subtasks.filter(t => t.status === 'TODO')
-    const inProgress = subtasks.filter(t => t.status === 'IN_PROGRESS')
-    const allStuck = todo.length > 0 && inProgress.length === 0 && unlocked === 0
-
-    if (allStuck) {
-      // Checa se há itens na fila ainda
-      const inQueue = await prisma.agentQueue.count({
-        where: {
-          taskId: { in: subtasks.map(t => t.id) },
-          status: { in: ['PENDING', 'PROCESSING'] },
-        },
-      })
-      if (inQueue === 0) {
-        console.warn(`[Maestro] Orquestração ${orchestrationId} parece travada — nenhuma tarefa em progresso`)
+    // Detecta travamento: tasks pendentes fora da fila
+    const remaining = total - done
+    if (remaining > 0 && inQueue === 0) {
+      const ready = await dependencyManager.getReadyTasks(orchestrationId)
+      if (ready.length > 0) {
+        console.warn(`[Maestro] ${ready.length} task(s) pronta(s) fora da fila — re-enfileirando`)
+        for (const task of ready) {
+          if (task.agentId) {
+            await queueManager.addToQueue(task.id, task.agentId, {
+              priority: this._priorityToNumber(task.priority as TaskPriority),
+            })
+          }
+        }
+      } else {
+        console.warn(`[Maestro] Orquestração ${orchestrationId} parece travada — ${remaining} task(s) sem deps liberadas`)
       }
     }
   }
