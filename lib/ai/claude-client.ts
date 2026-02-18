@@ -5,7 +5,7 @@ import Anthropic from '@anthropic-ai/sdk';
  */
 const CLAUDE_CONFIG = {
   model: 'claude-sonnet-4-20250514',
-  maxTokens: 1024,
+  maxTokens: 4096,
 } as const;
 
 /**
@@ -84,26 +84,55 @@ export async function createClaudeMessage(
  * @param systemPrompt - Optional system prompt
  * @returns Parsed JSON object
  */
+/**
+ * Sanitiza a string JSON removendo problemas comuns de LLMs:
+ * - Comentários de linha (// ...)
+ * - Trailing commas antes de } ou ]
+ * - Texto antes/depois do JSON
+ */
+function sanitizeJsonResponse(raw: string): string {
+  let s = raw.trim()
+
+  // Remove markdown code blocks
+  if (s.startsWith('```json')) {
+    s = s.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+  } else if (s.startsWith('```')) {
+    s = s.replace(/^```\s*/, '').replace(/\s*```$/, '')
+  }
+
+  // Extrai apenas o JSON (primeira { até última })
+  const firstBrace = s.indexOf('{')
+  const lastBrace = s.lastIndexOf('}')
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    s = s.slice(firstBrace, lastBrace + 1)
+  }
+
+  // Remove comentários de linha (// ...) que não estão dentro de strings
+  s = s.replace(/(?<="[^"]*".*?)\/\/[^\n]*/g, '')
+  // Fallback mais agressivo: remove qualquer // seguido de texto até fim de linha
+  // mas só se estiver fora de aspas (heurística simples)
+  s = s.replace(/,?\s*\/\/[^\n"]*/g, '')
+
+  // Remove trailing commas antes de } ou ]
+  s = s.replace(/,\s*([}\]])/g, '$1')
+
+  return s.trim()
+}
+
 export async function createClaudeJsonMessage<T>(
   prompt: string,
   systemPrompt?: string
 ): Promise<T> {
-  let response = await createClaudeMessage(prompt, systemPrompt);
-
-  // Remove markdown code blocks if present (```json ... ```)
-  response = response.trim();
-  if (response.startsWith('```json')) {
-    response = response.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-  } else if (response.startsWith('```')) {
-    response = response.replace(/^```\s*/, '').replace(/\s*```$/, '');
-  }
+  const response = await createClaudeMessage(prompt, systemPrompt)
+  const sanitized = sanitizeJsonResponse(response)
 
   try {
-    return JSON.parse(response) as T;
+    return JSON.parse(sanitized) as T
   } catch (error) {
-    console.error('Failed to parse Claude response:', response);
+    console.error('Failed to parse Claude response. Raw:', response)
+    console.error('Sanitized:', sanitized)
     throw new Error(
       `Failed to parse Claude response as JSON: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
+    )
   }
 }
