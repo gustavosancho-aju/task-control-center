@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/db'
-import { maestroOrchestrator } from '@/lib/agents/maestro-orchestrator'
 
 /**
  * POST /api/orchestrate
  *
- * Inicia a orquestração de uma tarefa via MaestroOrchestrator.
- * O Maestro decompõe a tarefa em subtarefas, atribui agentes e
- * enfileira a execução respeitando dependências.
+ * Inicia a orquestração de uma tarefa em background.
+ * Retorna imediatamente com status ORCHESTRATING para evitar
+ * timeout do Vercel Hobby (10s).
  *
  * Body:
  *   taskId      — ID da tarefa a orquestrar (obrigatório)
@@ -47,80 +46,70 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Inicia orquestração (pode demorar — chama Claude)
-    const result = await maestroOrchestrator.orchestrate(taskId)
-
-    // Aciona o AutoProcessor para processar a fila imediatamente (se solicitado)
-    // Usa um loop contínuo que processa todas as subtasks conforme dependências são liberadas
-    if (autoExecute) {
-      const { autoProcessor } = await import('@/lib/agents/auto-processor')
-      const orchestrationId = result.orchestrationId
-      // Fire-and-forget: loop que processa tick + monitora até orquestração completar
-      ;(async () => {
-        const MAX_TICKS = 50 // Segurança: máximo de ciclos
-        for (let i = 0; i < MAX_TICKS; i++) {
-          try {
-            await autoProcessor.tick()
-
-            // Verifica se orquestração terminou
-            const orch = await prisma.orchestration.findUnique({
-              where: { id: orchestrationId },
-              select: { status: true },
-            })
-            if (!orch || ['COMPLETED', 'FAILED'].includes(orch.status)) {
-              console.log(`[orchestrate] Orquestração ${orchestrationId} finalizada (${orch?.status})`)
-              break
-            }
-
-            // Monitora e re-enfileira tasks prontas
-            await maestroOrchestrator.monitorExecution(orchestrationId)
-
-            // Aguarda antes do próximo ciclo para dar tempo às execuções
-            await new Promise(resolve => setTimeout(resolve, 3000))
-          } catch (err) {
-            console.warn(`[orchestrate] Tick ${i} error:`, err)
-            break
-          }
-        }
-      })().catch((err: unknown) =>
-        console.warn('[orchestrate] Processing loop error:', err)
+    // Verifica se já existe orquestração ativa
+    const existing = await prisma.orchestration.findUnique({
+      where: { parentTaskId: taskId },
+    })
+    if (existing && !['FAILED'].includes(existing.status)) {
+      return NextResponse.json(
+        {
+          success: true,
+          data: {
+            orchestrationId: existing.id,
+            status: existing.status,
+            currentPhase: existing.currentPhase,
+          },
+          message: 'Orquestração já em andamento',
+        },
+        { status: 200 }
       )
     }
 
-    // Busca o estado atualizado da orquestração para retornar
-    const orchestration = await prisma.orchestration.findUnique({
-      where: { id: result.orchestrationId },
-      include: {
-        subtasks: {
-          select: {
-            id: true, title: true, status: true, priority: true,
-            agentId: true, agentName: true, estimatedHours: true,
-          },
-          orderBy: { createdAt: 'asc' },
-        },
-      },
-    })
+    // Dispara orquestração em background (fire-and-forget)
+    // NÃO await — retorna o response HTTP imediatamente
+    ;(async () => {
+      try {
+        const { maestroOrchestrator } = await import('@/lib/agents/maestro-orchestrator')
+        const result = await maestroOrchestrator.orchestrate(taskId)
+        console.log(`[orchestrate] Orquestração ${result.orchestrationId} criada: ${result.subtasksCreated} subtarefas`)
+
+        if (autoExecute) {
+          const { autoProcessor } = await import('@/lib/agents/auto-processor')
+          const MAX_TICKS = 50
+          for (let i = 0; i < MAX_TICKS; i++) {
+            await autoProcessor.tick()
+            const orch = await prisma.orchestration.findUnique({
+              where: { id: result.orchestrationId },
+              select: { status: true },
+            })
+            if (!orch || ['COMPLETED', 'FAILED'].includes(orch.status)) {
+              console.log(`[orchestrate] Finalizada: ${orch?.status}`)
+              break
+            }
+            await maestroOrchestrator.monitorExecution(result.orchestrationId)
+            await new Promise(resolve => setTimeout(resolve, 3000))
+          }
+        }
+      } catch (err) {
+        console.error(`[orchestrate] Background orchestration failed:`, err)
+      }
+    })()
 
     return NextResponse.json(
       {
         success: true,
         data: {
-          orchestrationId: result.orchestrationId,
-          status: orchestration?.status,
-          totalSubtasks: result.subtasksCreated,
-          currentPhase: orchestration?.currentPhase,
-          plan: result.plan,
-          subtasks: orchestration?.subtasks ?? [],
+          taskId: task.id,
+          status: 'ORCHESTRATING',
         },
-        message: `Orquestração iniciada: ${result.subtasksCreated} subtarefas criadas`,
+        message: 'Orquestração iniciada em background. Acompanhe o progresso na página da tarefa.',
       },
-      { status: 201 }
+      { status: 202 }
     )
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error('POST /api/orchestrate error:', error)
 
-    // Erros de negócio (orquestração já existe, tarefa já concluída)
     const isClientError = message.includes('já existe') || message.includes('já concluída')
     return NextResponse.json(
       { success: false, error: message },

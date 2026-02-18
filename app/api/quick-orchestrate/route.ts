@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/db'
-import { maestroOrchestrator } from '@/lib/agents/maestro-orchestrator'
 import { TaskStatus } from '@prisma/client'
 import { logTaskCreate } from '@/lib/audit/logger'
 import { cache } from '@/lib/cache'
@@ -15,22 +14,17 @@ const QuickOrchestrateSchema = z.object({
 /**
  * POST /api/quick-orchestrate
  *
- * Cria uma tarefa e inicia a orquestração em um único request.
+ * Cria uma tarefa e dispara a orquestração em background.
+ * Retorna imediatamente com o taskId — a orquestração acontece de forma assíncrona.
  *
- * Body:
- *   title       — título da tarefa (obrigatório)
- *   description — descrição opcional
- *   priority    — LOW | MEDIUM | HIGH | URGENT (default: MEDIUM)
- *
- * Returns:
- *   { taskId, orchestrationId, redirectUrl }
+ * Isso evita o timeout de 10s do Vercel Hobby plan.
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const data = QuickOrchestrateSchema.parse(body)
 
-    // ── 1. Criar tarefa ───────────────────────────────────────────────────
+    // ── 1. Criar tarefa (rápido, ~200ms) ────────────────────────────────
     const task = await prisma.task.create({
       data: {
         title: data.title,
@@ -50,47 +44,46 @@ export async function POST(request: NextRequest) {
     logTaskCreate(task.id, task.title)
     cache.invalidatePattern('tasks:*')
 
-    // ── 2. Iniciar orquestração ───────────────────────────────────────────
-    const result = await maestroOrchestrator.orchestrate(task.id)
-
-    // Fire-and-forget: loop contínuo que processa + monitora até orquestração completar
-    const orchestrationId = result.orchestrationId
+    // ── 2. Disparar orquestração em background (fire-and-forget) ────────
+    // NÃO await — retorna o response HTTP imediatamente
+    const taskId = task.id
     ;(async () => {
-      const { autoProcessor } = await import('@/lib/agents/auto-processor')
-      const { maestroOrchestrator: maestro } = await import('@/lib/agents/maestro-orchestrator')
-      const MAX_TICKS = 50
-      for (let i = 0; i < MAX_TICKS; i++) {
-        try {
+      try {
+        const { maestroOrchestrator } = await import('@/lib/agents/maestro-orchestrator')
+        const result = await maestroOrchestrator.orchestrate(taskId)
+        console.log(`[quick-orchestrate] Orquestração ${result.orchestrationId} criada para "${task.title}"`)
+
+        // Processa a fila imediatamente + loop de monitoramento
+        const { autoProcessor } = await import('@/lib/agents/auto-processor')
+        const MAX_TICKS = 50
+        for (let i = 0; i < MAX_TICKS; i++) {
           await autoProcessor.tick()
           const orch = await prisma.orchestration.findUnique({
-            where: { id: orchestrationId },
+            where: { id: result.orchestrationId },
             select: { status: true },
           })
-          if (!orch || ['COMPLETED', 'FAILED'].includes(orch.status)) break
-          await maestro.monitorExecution(orchestrationId)
+          if (!orch || ['COMPLETED', 'FAILED'].includes(orch.status)) {
+            console.log(`[quick-orchestrate] Orquestração finalizada: ${orch?.status}`)
+            break
+          }
+          await maestroOrchestrator.monitorExecution(result.orchestrationId)
           await new Promise(resolve => setTimeout(resolve, 3000))
-        } catch (err) {
-          console.warn(`[quick-orchestrate] Tick ${i} error:`, err)
-          break
         }
+      } catch (err) {
+        console.error(`[quick-orchestrate] Background orchestration failed for "${task.title}":`, err)
       }
-    })().catch((err: unknown) =>
-      console.warn('[quick-orchestrate] Processing loop error:', err)
-    )
+    })()
 
-    // ── 3. Retornar resultado ─────────────────────────────────────────────
-    const redirectUrl = `/orchestration/${result.orchestrationId}`
-
+    // ── 3. Retornar imediatamente ───────────────────────────────────────
     return NextResponse.json(
       {
         success: true,
         data: {
           taskId: task.id,
-          orchestrationId: result.orchestrationId,
-          redirectUrl,
-          subtasksCreated: result.subtasksCreated,
+          status: 'ORCHESTRATING',
+          redirectUrl: `/tasks/${task.id}`,
         },
-        message: `Tarefa criada e orquestração iniciada: ${result.subtasksCreated} subtarefas`,
+        message: 'Tarefa criada. Orquestração iniciada em background.',
       },
       { status: 201 }
     )

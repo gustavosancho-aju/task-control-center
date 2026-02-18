@@ -388,7 +388,8 @@ export default function CreateTaskPage() {
     })
     const data = await res.json()
     if (!data.success) throw new Error(data.error ?? "Falha ao iniciar orquestração")
-    return data.data.orchestrationId as string
+    // Retorna orchestrationId se disponível, senão taskId para redirect
+    return (data.data.orchestrationId ?? data.data.taskId) as string
   }
 
   // ── handleSubmit (normal flow, with optional autonomous mode) ──────────────
@@ -403,9 +404,10 @@ export default function CreateTaskPage() {
         setProgressStep("orchestrating")
         setProgressError(null)
         try {
-          const orchestrationId = await orchestrateTask(created.id)
+          await orchestrateTask(created.id)
           setProgressStep("redirecting")
-          setTimeout(() => router.push(`/orchestration/${orchestrationId}`), 400)
+          // Redireciona para a tarefa — orquestração acontece em background
+          setTimeout(() => router.push(`/tasks/${created.id}`), 400)
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err)
           setProgressError(msg)
@@ -430,10 +432,11 @@ export default function CreateTaskPage() {
       notifyTaskCreated(task.title)
 
       setProgressStep("orchestrating")
-      const orchestrationId = await orchestrateTask(created.id)
+      await orchestrateTask(created.id)
 
       setProgressStep("redirecting")
-      setTimeout(() => router.push(`/orchestration/${orchestrationId}`), 400)
+      // Redireciona para a tarefa — orquestração acontece em background
+      setTimeout(() => router.push(`/tasks/${created.id}`), 400)
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       setProgressError(msg)
