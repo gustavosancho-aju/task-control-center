@@ -5,7 +5,7 @@ import Anthropic from '@anthropic-ai/sdk';
  */
 const CLAUDE_CONFIG = {
   model: 'claude-sonnet-4-20250514',
-  maxTokens: 4096,
+  maxTokens: 8192,
 } as const;
 
 /**
