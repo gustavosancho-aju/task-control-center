@@ -1,6 +1,8 @@
 import prisma from '@/lib/db'
 import { createClaudeMessage } from '@/lib/ai/claude-client'
 import { agentEventEmitter, AgentEventTypes } from '@/lib/agents/event-emitter'
+import { dependencyManager } from '@/lib/agents/dependency-manager'
+import type { OrchestrationPlan, Phase } from '@/lib/agents/maestro-orchestrator'
 import type {
   Task,
   Agent,
@@ -79,6 +81,7 @@ Analise a tarefa e proponha melhorias de interface.`,
 class ExecutionEngine {
   private capabilities = new Map<AgentRole, AgentCapability[]>()
   private activeExecutions = new Set<string>()
+  private concurrencyLimit = 2
 
   registerCapability(agentRole: AgentRole, capability: AgentCapability): void {
     const existing = this.capabilities.get(agentRole) ?? []
@@ -103,6 +106,12 @@ class ExecutionEngine {
     })
 
     this.activeExecutions.add(execution.id)
+
+    // Atualiza task para IN_PROGRESS ao iniciar execução
+    await prisma.task.update({
+      where: { id: taskId },
+      data: { status: 'IN_PROGRESS' },
+    }).catch(() => {})
 
     const eventMeta = { executionId: execution.id, taskId, agentId }
 
@@ -149,6 +158,14 @@ class ExecutionEngine {
         },
       })
 
+      // Atualiza task para DONE em caso de sucesso
+      if (result.success) {
+        await prisma.task.update({
+          where: { id: taskId },
+          data: { status: 'DONE' },
+        }).catch(() => {})
+      }
+
       agentEventEmitter.emit(
         result.success ? AgentEventTypes.EXECUTION_COMPLETED : AgentEventTypes.EXECUTION_FAILED,
         result.success ? { result: result.result } : { error: result.error },
@@ -159,6 +176,13 @@ class ExecutionEngine {
         result.success ? 'INFO' : 'ERROR',
         result.success ? 'Execução concluída com sucesso' : `Execução falhou: ${result.error}`
       )
+
+      // Hook de orquestração: libera dependências e verifica conclusão de fase
+      if (result.success) {
+        this.onExecutionCompleted(task, result).catch(err =>
+          console.error('[ExecutionEngine] onExecutionCompleted error:', err)
+        )
+      }
 
       // Auto-comment do agente na tarefa
       try {
@@ -304,6 +328,17 @@ class ExecutionEngine {
         },
       })
 
+      if (result.success) {
+        await prisma.task.update({
+          where: { id: execution.taskId },
+          data: { status: 'DONE' },
+        }).catch(() => {})
+
+        this.onExecutionCompleted(execution.task, result).catch(err =>
+          console.error('[ExecutionEngine] onExecutionCompleted error:', err)
+        )
+      }
+
       return result
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
@@ -352,8 +387,273 @@ class ExecutionEngine {
   }
 
   // ============================================================================
+  // ORCHESTRATION EXECUTION
+  // ============================================================================
+
+  /**
+   * Busca todas as subtasks prontas de uma orquestração, adiciona na fila
+   * e executa em paralelo respeitando o limite de concorrência configurável.
+   * Tarefas desbloqueadas via cadeia de dependências continuam sendo processadas
+   * automaticamente pelo DependencyManager após cada conclusão.
+   */
+  async executeOrchestration(
+    orchestrationId: string,
+    concurrencyLimit = this.concurrencyLimit
+  ): Promise<void> {
+    const readyTasks = await dependencyManager.getReadyTasks(orchestrationId)
+
+    if (readyTasks.length === 0) {
+      console.log(`[ExecutionEngine] Nenhuma task pronta para orquestração ${orchestrationId}`)
+      return
+    }
+
+    const tasksWithAgents = readyTasks.filter(t => !!t.agentId)
+
+    if (tasksWithAgents.length < readyTasks.length) {
+      console.warn(
+        `[ExecutionEngine] ${readyTasks.length - tasksWithAgents.length} task(s) sem agente atribuído — puladas`
+      )
+    }
+
+    console.log(
+      `[ExecutionEngine] Iniciando ${tasksWithAgents.length} task(s) da orquestração ` +
+      `${orchestrationId} (limite: ${concurrencyLimit} paralelas)`
+    )
+
+    await this._runWithConcurrency(
+      tasksWithAgents,
+      concurrencyLimit,
+      async (task) => {
+        await this.executeTask(task.id, task.agentId!)
+      }
+    )
+  }
+
+  // ============================================================================
   // PRIVATE METHODS
   // ============================================================================
+
+  /**
+   * Hook chamado após execução bem-sucedida.
+   * Se a task pertence a uma orquestração:
+   *   1. Chama DependencyManager.onTaskCompleted → desbloqueia próximas tasks
+   *   2. Verifica se alguma fase foi completada → dispara review do SENTINEL
+   */
+  private async onExecutionCompleted(task: Task, result: ExecutionResult): Promise<void> {
+    if (!result.success) return
+    if (task.title.startsWith('[REVIEW]')) return // Evita loop em review tasks
+    if (!task.orchestrationId) return
+
+    await dependencyManager.onTaskCompleted(task.id)
+    await this.checkPhaseCompletion(task.id, task.orchestrationId)
+  }
+
+  /**
+   * Verifica se todas as subtarefas de uma fase do plano estão concluídas.
+   * Quando completa, dispara o review automático do SENTINEL para a fase.
+   */
+  private async checkPhaseCompletion(
+    completedTaskId: string,
+    orchestrationId: string
+  ): Promise<void> {
+    const orchestration = await prisma.orchestration.findUnique({
+      where: { id: orchestrationId },
+      select: { plan: true, status: true },
+    })
+
+    if (!orchestration?.plan || orchestration.status === 'COMPLETED') return
+
+    const plan = orchestration.plan as unknown as OrchestrationPlan
+    if (!plan.phases || !Array.isArray(plan.phases)) return
+
+    for (const phase of plan.phases) {
+      const phaseTitles = phase.subtasks.map(s => s.title)
+
+      const phaseTasks = await prisma.task.findMany({
+        where: { orchestrationId, title: { in: phaseTitles } },
+        select: { id: true, title: true, status: true },
+      })
+
+      const isInPhase = phaseTasks.some(t => t.id === completedTaskId)
+      if (!isInPhase) continue
+
+      const allDone = phaseTasks.length > 0 && phaseTasks.every(t => t.status === 'DONE')
+      if (!allDone) return // Fase ainda não completamente concluída
+
+      await this.triggerPhaseReview(orchestrationId, phase, phaseTasks)
+      break
+    }
+  }
+
+  /**
+   * Cria a task de review para a fase e inicia o SENTINEL em background.
+   * Garante idempotência: não cria review duplicado para a mesma fase.
+   */
+  private async triggerPhaseReview(
+    orchestrationId: string,
+    phase: Phase,
+    completedTasks: { id: string; title: string; status: string }[]
+  ): Promise<void> {
+    const sentinel = await prisma.agent.findFirst({
+      where: { role: 'SENTINEL', isActive: true },
+    })
+
+    if (!sentinel) {
+      console.warn('[ExecutionEngine] Nenhum agente SENTINEL disponível para review de fase')
+      return
+    }
+
+    const reviewTitle = `[REVIEW] ${phase.name}`
+
+    // Idempotência: evita revisões duplicadas para a mesma fase
+    const existing = await prisma.task.findFirst({
+      where: { orchestrationId, title: reviewTitle },
+    })
+    if (existing) return
+
+    const taskList = completedTasks.map(t => `- ${t.title}`).join('\n')
+    const reviewTask = await prisma.task.create({
+      data: {
+        title: reviewTitle,
+        description:
+          `Review automático da fase "${phase.name}".\n\n` +
+          `Tarefas concluídas nesta fase:\n${taskList}`,
+        status: 'TODO',
+        priority: 'HIGH',
+        orchestrationId,
+        agentId: sentinel.id,
+        agentName: sentinel.name,
+        autoCreated: true,
+      },
+    })
+
+    console.log(`[ExecutionEngine] Review da fase "${phase.name}" iniciado (task: ${reviewTask.id})`)
+
+    // Executa em background para não bloquear o fluxo principal
+    this.executePhaseReview(reviewTask, orchestrationId, completedTasks).catch(err =>
+      console.error('[ExecutionEngine] Erro no review de fase:', err)
+    )
+  }
+
+  /**
+   * Executa o review de fase com o SENTINEL via Claude AI.
+   * APROVADO → emite EXECUTION_COMPLETED e loga sucesso
+   * REPROVADO → move tasks para status REVIEW (aguardando correção) e atualiza orquestração
+   */
+  private async executePhaseReview(
+    reviewTask: Task,
+    orchestrationId: string,
+    completedTasks: { id: string; title: string }[]
+  ): Promise<void> {
+    const sentinel = await prisma.agent.findFirst({
+      where: { role: 'SENTINEL', isActive: true },
+    })
+    if (!sentinel) return
+
+    await prisma.task.update({
+      where: { id: reviewTask.id },
+      data: { status: 'IN_PROGRESS' },
+    }).catch(() => {})
+
+    const systemPrompt = ROLE_SYSTEM_PROMPTS['SENTINEL']
+    const phaseName = reviewTask.title.replace('[REVIEW] ', '')
+    const prompt = `Você está realizando o review de qualidade da fase "${phaseName}" de uma orquestração de desenvolvimento.
+
+Tarefas concluídas nesta fase:
+${completedTasks.map(t => `- ${t.title}`).join('\n')}
+
+Avalie se as tarefas foram concluídas adequadamente e se a qualidade é aceitável para prosseguir para a próxima fase.
+
+Responda com uma das seguintes decisões na primeira linha:
+- APROVADO: se a fase passou no review e a próxima fase pode iniciar
+- REPROVADO: se foram encontrados problemas que precisam de correção
+
+Seguido de um feedback detalhado justificando sua decisão.`
+
+    try {
+      const response = await createClaudeMessage(prompt, systemPrompt)
+      const approved = response.toUpperCase().trimStart().startsWith('APROVADO')
+
+      // Salva o resultado do review como comentário na task
+      await prisma.comment.create({
+        data: {
+          taskId: reviewTask.id,
+          content: response,
+          authorName: sentinel.name,
+          authorType: 'AGENT',
+        },
+      }).catch(() => {})
+
+      // Marca a review task como concluída
+      await prisma.task.update({
+        where: { id: reviewTask.id },
+        data: { status: 'DONE' },
+      }).catch(() => {})
+
+      if (approved) {
+        console.log(`[ExecutionEngine] ✅ Review APROVADO para fase "${phaseName}"`)
+        agentEventEmitter.emit(
+          AgentEventTypes.EXECUTION_COMPLETED,
+          { result: `Fase "${phaseName}" aprovada no review` },
+          { taskId: reviewTask.id }
+        )
+      } else {
+        console.warn(`[ExecutionEngine] ❌ Review REPROVADO para fase "${phaseName}"`)
+
+        // Retorna tasks da fase para REVIEW (aguardando correção)
+        await prisma.task.updateMany({
+          where: { id: { in: completedTasks.map(t => t.id) } },
+          data: { status: 'REVIEW' },
+        })
+
+        await prisma.orchestration.update({
+          where: { id: orchestrationId },
+          data: {
+            status: 'REVIEWING',
+            currentPhase: `Review reprovado — "${phaseName}" aguarda correções`,
+          },
+        }).catch(() => {})
+
+        agentEventEmitter.emit(
+          AgentEventTypes.EXECUTION_FAILED,
+          { error: `Review reprovado para fase "${phaseName}": ${response.substring(0, 200)}` },
+          { taskId: reviewTask.id }
+        )
+      }
+    } catch (err) {
+      console.error(`[ExecutionEngine] Erro ao executar review da fase "${phaseName}":`, err)
+
+      await prisma.task.update({
+        where: { id: reviewTask.id },
+        data: { status: 'DONE' },
+      }).catch(() => {})
+    }
+  }
+
+  /**
+   * Executa uma lista de itens em paralelo com limite de concorrência.
+   * Modelo de workers: cada worker consome items da fila até esgotá-la,
+   * garantindo throughput constante com no máximo `limit` execuções simultâneas.
+   */
+  private async _runWithConcurrency<T>(
+    items: T[],
+    limit: number,
+    fn: (item: T) => Promise<void>
+  ): Promise<void> {
+    const queue = [...items]
+    const workers = Array.from(
+      { length: Math.min(limit, items.length) },
+      async () => {
+        while (queue.length > 0) {
+          const item = queue.shift()
+          if (item !== undefined) {
+            await fn(item)
+          }
+        }
+      }
+    )
+    await Promise.all(workers)
+  }
 
   private buildContext(
     execution: AgentExecution,

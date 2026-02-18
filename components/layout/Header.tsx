@@ -17,12 +17,13 @@ import {
   FileText,
   Shield,
   Plus,
-  Bell,
   Command,
   Settings,
+  GitMerge,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
+import { NotificationCenter } from "@/components/notifications/NotificationCenter"
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -31,6 +32,7 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle"
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/kanban", label: "Kanban", icon: Columns3 },
+  { href: "/orchestrations", label: "Orquestrações", icon: GitMerge },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/monitor", label: "Monitor", icon: Activity },
   { href: "/templates", label: "Templates", icon: FileText },
@@ -42,6 +44,10 @@ const NAV_ITEMS = [
 // Component
 // ---------------------------------------------------------------------------
 
+const ACTIVE_ORCH_STATUSES = new Set([
+  "PLANNING", "CREATING_SUBTASKS", "ASSIGNING_AGENTS", "EXECUTING", "REVIEWING",
+])
+
 export function Header() {
   const pathname = usePathname()
 
@@ -51,8 +57,28 @@ export function Header() {
   // Global search
   const [searchOpen, setSearchOpen] = useState(false)
 
-  // Notifications (placeholder count)
-  const [notifCount] = useState(0)
+  // Active orchestrations count (for badge)
+  const [activeOrchCount, setActiveOrchCount] = useState(0)
+
+  useEffect(() => {
+    async function fetchOrchCount() {
+      try {
+        const res = await fetch("/api/orchestrate?limit=50", { cache: "no-store" })
+        if (!res.ok) return
+        const json = await res.json()
+        if (!json.success) return
+        const active = (json.data as { status: string }[]).filter(
+          (o) => ACTIVE_ORCH_STATUSES.has(o.status)
+        ).length
+        setActiveOrchCount(active)
+      } catch {
+        // silent
+      }
+    }
+    fetchOrchCount()
+    const interval = setInterval(fetchOrchCount, 30_000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -105,6 +131,11 @@ export function Header() {
                   >
                     <item.icon className="h-4 w-4" />
                     {item.label}
+                    {item.href === "/orchestrations" && activeOrchCount > 0 && (
+                      <span className="ml-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-500 px-1 text-[10px] font-bold text-white">
+                        {activeOrchCount}
+                      </span>
+                    )}
                   </Button>
                 </Link>
               ))}
@@ -140,14 +171,7 @@ export function Header() {
               <ThemeToggle />
 
               {/* Notifications */}
-              <Button variant="ghost" size="icon-sm" className="relative text-muted-foreground">
-                <Bell className="h-4 w-4" />
-                {notifCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-destructive text-primary-foreground text-[10px] font-bold">
-                    {notifCount > 9 ? "9+" : notifCount}
-                  </span>
-                )}
-              </Button>
+              <NotificationCenter />
 
               <Separator orientation="vertical" className="h-6 hidden md:block" />
 
@@ -189,6 +213,11 @@ export function Header() {
                   >
                     <item.icon className="h-4 w-4" />
                     {item.label}
+                    {item.href === "/orchestrations" && activeOrchCount > 0 && (
+                      <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-500 px-1 text-[10px] font-bold text-white">
+                        {activeOrchCount}
+                      </span>
+                    )}
                   </Button>
                 </Link>
               ))}

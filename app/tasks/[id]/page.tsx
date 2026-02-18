@@ -27,6 +27,11 @@ import {
   MessageSquare,
   Paperclip,
   Shield,
+  Network,
+  Target,
+  GitBranch,
+  ArrowRight,
+  ArrowLeft as ArrowLeftIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
@@ -74,6 +79,26 @@ import { TaskDetailSkeleton } from '@/components/ui/skeletons';
 // TYPES
 // ============================================================================
 
+interface OrchestrationSummary {
+  id: string;
+  status: string;
+  totalSubtasks: number;
+  completedSubtasks: number;
+  currentPhase?: string | null;
+}
+
+interface OrchestrationRef {
+  id: string;
+  parentTaskId: string;
+  parentTask?: { id: string; title: string } | null;
+}
+
+interface DependencyTask {
+  id: string;
+  title: string;
+  status: TaskStatus;
+}
+
 interface Task {
   id: string;
   title: string;
@@ -90,6 +115,11 @@ interface Task {
   actualHours?: number | null;
   statusHistory?: TimelineItem[];
   parentId?: string | null;
+  orchestrationId?: string | null;
+  ownedOrchestration?: OrchestrationSummary | null;
+  orchestration?: OrchestrationRef | null;
+  dependsOn?: DependencyTask[];
+  dependents?: DependencyTask[];
 }
 
 interface Subtask {
@@ -134,6 +164,34 @@ const NEXT_STATUS_MAP: Record<string, string> = {
   REVIEW: 'DONE',
 };
 
+const ORCHESTRATION_STATUS_LABEL: Record<string, string> = {
+  PLANNING: 'Planejando',
+  CREATING_SUBTASKS: 'Criando subtarefas',
+  ASSIGNING_AGENTS: 'Atribuindo agentes',
+  EXECUTING: 'Executando',
+  REVIEWING: 'Revisando',
+  COMPLETED: 'Concluída',
+  FAILED: 'Falhou',
+};
+
+const ORCHESTRATION_STATUS_COLOR: Record<string, string> = {
+  PLANNING: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
+  CREATING_SUBTASKS: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
+  ASSIGNING_AGENTS: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
+  EXECUTING: 'text-purple-500 bg-purple-500/10 border-purple-500/20',
+  REVIEWING: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
+  COMPLETED: 'text-green-500 bg-green-500/10 border-green-500/20',
+  FAILED: 'text-red-500 bg-red-500/10 border-red-500/20',
+};
+
+const DEP_STATUS_COLOR: Record<string, string> = {
+  TODO: 'text-muted-foreground',
+  IN_PROGRESS: 'text-blue-500',
+  REVIEW: 'text-amber-500',
+  DONE: 'text-green-500',
+  BLOCKED: 'text-red-500',
+};
+
 // ============================================================================
 // TASK DETAIL PAGE
 // ============================================================================
@@ -169,6 +227,9 @@ export default function TaskDetailPage() {
   // Audit states
   const [auditEntries, setAuditEntries] = useState<{ id: string; entityType: string; entityId: string; action: string; changes?: Record<string, { from: unknown; to: unknown }> | null; performedBy: string; createdAt: string }[]>([]);
   const [auditExpanded, setAuditExpanded] = useState(false);
+
+  // Orchestration states
+  const [orchestratingTask, setOrchestratingTask] = useState(false);
 
   // Feedback states
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -665,6 +726,34 @@ export default function TaskDetailPage() {
     await handleExecuteTask();
   };
 
+  const handleOrchestrate = async () => {
+    if (!task) return;
+    setOrchestratingTask(true);
+    try {
+      notifyInfo('Iniciando orquestração...', `Decompondo "${task.title}" com Maestro`);
+      const response = await fetch('/api/orchestrate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ taskId: task.id, autoExecute: false }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        notifyError('Erro ao orquestrar', data.error);
+        return;
+      }
+      const data = await response.json();
+      if (data.success) {
+        notifySuccess('Orquestração criada!', `${data.subtasksCreated} subtarefas geradas pelo Maestro`);
+        router.push(`/orchestration/${data.orchestrationId}`);
+      }
+    } catch (err) {
+      console.error('Error orchestrating task:', err);
+      notifyError('Erro', 'Não foi possível iniciar a orquestração.');
+    } finally {
+      setOrchestratingTask(false);
+    }
+  };
+
   // ============================================================================
   // FEEDBACK HANDLERS
   // ============================================================================
@@ -826,6 +915,22 @@ export default function TaskDetailPage() {
                     Subtarefa
                   </Badge>
                 )}
+                {task.orchestrationId && task.orchestration?.parentTask && (
+                  <Link href={`/orchestration/${task.orchestrationId}`}>
+                    <Badge variant="outline" className="flex items-center gap-1 text-purple-500 border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 cursor-pointer transition-colors">
+                      <Network className="h-3 w-3" />
+                      Subtarefa de Orquestração
+                    </Badge>
+                  </Link>
+                )}
+                {task.ownedOrchestration && (
+                  <Link href={`/orchestration/${task.ownedOrchestration.id}`}>
+                    <Badge variant="outline" className={`flex items-center gap-1 cursor-pointer transition-colors hover:opacity-80 border ${ORCHESTRATION_STATUS_COLOR[task.ownedOrchestration.status] ?? 'text-muted-foreground'}`}>
+                      <Network className="h-3 w-3" />
+                      Orquestração: {ORCHESTRATION_STATUS_LABEL[task.ownedOrchestration.status] ?? task.ownedOrchestration.status}
+                    </Badge>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -931,6 +1036,69 @@ export default function TaskDetailPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* ====== PARENT ORCHESTRATION SECTION ====== */}
+              {task.orchestrationId && task.orchestration?.parentTask && (
+                <Card className="border-purple-500/20 bg-purple-500/5">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="flex items-center gap-2 text-purple-500">
+                      <Network className="h-5 w-5" />
+                      Parte de Orquestração
+                    </CardTitle>
+                    <Link href={`/orchestration/${task.orchestrationId}`}>
+                      <Button size="sm" variant="outline" className="border-purple-500/30 text-purple-500 hover:bg-purple-500/10">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Ver Orquestração
+                      </Button>
+                    </Link>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <GitBranch className="h-4 w-4" />
+                      <span>Tarefa pai:</span>
+                      <Link href={`/tasks/${task.orchestration.parentTask.id}`} className="font-medium text-foreground hover:underline">
+                        {task.orchestration.parentTask.title}
+                      </Link>
+                    </div>
+                    {(task.dependsOn && task.dependsOn.length > 0) || (task.dependents && task.dependents.length > 0) ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        {task.dependsOn && task.dependsOn.length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
+                              <ArrowLeftIcon className="h-3 w-3" />
+                              Depende de ({task.dependsOn.length})
+                            </p>
+                            <div className="space-y-1">
+                              {task.dependsOn.map((dep) => (
+                                <Link key={dep.id} href={`/tasks/${dep.id}`} className="flex items-center gap-2 text-xs p-1.5 rounded hover:bg-muted/50 transition-colors">
+                                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dep.status === 'DONE' ? 'bg-green-500' : dep.status === 'IN_PROGRESS' ? 'bg-blue-500' : dep.status === 'BLOCKED' ? 'bg-red-500' : 'bg-muted-foreground'}`} />
+                                  <span className={`truncate ${DEP_STATUS_COLOR[dep.status] ?? ''}`}>{dep.title}</span>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {task.dependents && task.dependents.length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
+                              <ArrowRight className="h-3 w-3" />
+                              Dependentes ({task.dependents.length})
+                            </p>
+                            <div className="space-y-1">
+                              {task.dependents.map((dep) => (
+                                <Link key={dep.id} href={`/tasks/${dep.id}`} className="flex items-center gap-2 text-xs p-1.5 rounded hover:bg-muted/50 transition-colors">
+                                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dep.status === 'DONE' ? 'bg-green-500' : dep.status === 'IN_PROGRESS' ? 'bg-blue-500' : dep.status === 'BLOCKED' ? 'bg-red-500' : 'bg-muted-foreground'}`} />
+                                  <span className={`truncate ${DEP_STATUS_COLOR[dep.status] ?? ''}`}>{dep.title}</span>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* ====== EXECUTION SECTION ====== */}
               <Card>
@@ -1238,6 +1406,46 @@ export default function TaskDetailPage() {
                   </Button>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {/* Orchestration banner when subtasks come from orchestration */}
+                  {task.ownedOrchestration && existingSubtasks.length > 0 && (
+                    <div className="flex items-center justify-between rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 py-2">
+                      <div className="flex items-center gap-2 text-sm text-purple-500">
+                        <Network className="h-4 w-4 flex-shrink-0" />
+                        <span>
+                          {task.ownedOrchestration.completedSubtasks}/{task.ownedOrchestration.totalSubtasks} subtarefas orquestradas
+                        </span>
+                      </div>
+                      <Link href={`/orchestration/${task.ownedOrchestration.id}`}>
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-purple-500 hover:text-purple-600 hover:bg-purple-500/10">
+                          Ver grafo
+                          <ArrowRight className="h-3 w-3 ml-1" />
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+
+                  {/* Progress summary for orchestrated subtasks */}
+                  {task.ownedOrchestration && existingSubtasks.length > 0 && (
+                    <div className="space-y-2">
+                      {(() => {
+                        const done = existingSubtasks.filter(s => s.status === 'DONE').length;
+                        const inProgress = existingSubtasks.filter(s => s.status === 'IN_PROGRESS').length;
+                        const blocked = existingSubtasks.filter(s => s.status === 'BLOCKED').length;
+                        const todo = existingSubtasks.filter(s => s.status === 'TODO').length;
+                        return (
+                          <div className="flex gap-2 text-xs">
+                            {done > 0 && <span className="flex items-center gap-1 text-green-500"><CheckCircle2 className="h-3 w-3" />{done} concluída{done > 1 ? 's' : ''}</span>}
+                            {inProgress > 0 && <span className="flex items-center gap-1 text-blue-500"><Play className="h-3 w-3" />{inProgress} em progresso</span>}
+                            {blocked > 0 && <span className="flex items-center gap-1 text-red-500"><XCircle className="h-3 w-3" />{blocked} bloqueada{blocked > 1 ? 's' : ''}</span>}
+                            {todo > 0 && <span className="flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" />{todo} pendente{todo > 1 ? 's' : ''}</span>}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
+                  {(task.ownedOrchestration && existingSubtasks.length > 0) && <Separator />}
+
                   {/* AI Suggestions */}
                   {(subtaskSuggestions !== null || loadingSubtasks) && (
                     <div>
@@ -1260,6 +1468,55 @@ export default function TaskDetailPage() {
                   />
                 </CardContent>
               </Card>
+
+              {/* ====== DEPENDENCIES SECTION (non-orchestration tasks with dependencies) ====== */}
+              {!task.orchestrationId && ((task.dependsOn && task.dependsOn.length > 0) || (task.dependents && task.dependents.length > 0)) && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2">
+                      <GitBranch className="h-5 w-5 text-muted-foreground" />
+                      Dependências
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {task.dependsOn && task.dependsOn.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                          <ArrowLeftIcon className="h-3 w-3" />
+                          Esta tarefa depende de
+                        </p>
+                        <div className="space-y-1">
+                          {task.dependsOn.map((dep) => (
+                            <Link key={dep.id} href={`/tasks/${dep.id}`} className="flex items-center gap-2 text-sm p-2 rounded hover:bg-muted/50 transition-colors">
+                              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dep.status === 'DONE' ? 'bg-green-500' : dep.status === 'IN_PROGRESS' ? 'bg-blue-500' : dep.status === 'BLOCKED' ? 'bg-red-500' : 'bg-muted-foreground'}`} />
+                              <span className={`truncate flex-1 ${DEP_STATUS_COLOR[dep.status] ?? ''}`}>{dep.title}</span>
+                              <ExternalLink className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {task.dependsOn && task.dependsOn.length > 0 && task.dependents && task.dependents.length > 0 && <Separator />}
+                    {task.dependents && task.dependents.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                          <ArrowRight className="h-3 w-3" />
+                          Dependentes desta tarefa
+                        </p>
+                        <div className="space-y-1">
+                          {task.dependents.map((dep) => (
+                            <Link key={dep.id} href={`/tasks/${dep.id}`} className="flex items-center gap-2 text-sm p-2 rounded hover:bg-muted/50 transition-colors">
+                              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dep.status === 'DONE' ? 'bg-green-500' : dep.status === 'IN_PROGRESS' ? 'bg-blue-500' : dep.status === 'BLOCKED' ? 'bg-red-500' : 'bg-muted-foreground'}`} />
+                              <span className={`truncate flex-1 ${DEP_STATUS_COLOR[dep.status] ?? ''}`}>{dep.title}</span>
+                              <ExternalLink className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* ====== HISTORY CARD ====== */}
               {task.statusHistory && task.statusHistory.length > 0 && (
@@ -1330,6 +1587,81 @@ export default function TaskDetailPage() {
 
             {/* Right Column: Agent & Metadata */}
             <div className="space-y-6">
+              {/* ====== ORCHESTRATION CARD ====== */}
+              {task.ownedOrchestration ? (
+                <Card className="border-purple-500/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <Network className="h-4 w-4 text-purple-500" />
+                      Orquestração
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className={`text-xs border ${ORCHESTRATION_STATUS_COLOR[task.ownedOrchestration.status] ?? 'text-muted-foreground'}`}>
+                        {ORCHESTRATION_STATUS_LABEL[task.ownedOrchestration.status] ?? task.ownedOrchestration.status}
+                      </Badge>
+                      {task.ownedOrchestration.currentPhase && (
+                        <span className="text-xs text-muted-foreground">{task.ownedOrchestration.currentPhase}</span>
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                        <span>{task.ownedOrchestration.completedSubtasks} / {task.ownedOrchestration.totalSubtasks} subtarefas</span>
+                        <span>
+                          {task.ownedOrchestration.totalSubtasks > 0
+                            ? Math.round((task.ownedOrchestration.completedSubtasks / task.ownedOrchestration.totalSubtasks) * 100)
+                            : 0}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-purple-500 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${task.ownedOrchestration.totalSubtasks > 0
+                              ? Math.round((task.ownedOrchestration.completedSubtasks / task.ownedOrchestration.totalSubtasks) * 100)
+                              : 0}%`
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <Link href={`/orchestration/${task.ownedOrchestration.id}`} className="block">
+                      <Button size="sm" variant="outline" className="w-full border-purple-500/30 text-purple-500 hover:bg-purple-500/10">
+                        <Network className="h-4 w-4 mr-2" />
+                        Ver Orquestração
+                        <ArrowRight className="h-3 w-3 ml-auto" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ) : !task.orchestrationId && task.status !== 'DONE' ? (
+                <Card className="border-dashed">
+                  <CardContent className="py-4 space-y-3">
+                    <div className="text-center space-y-1">
+                      <Target className="h-8 w-8 text-muted-foreground mx-auto" />
+                      <p className="text-sm font-medium">Orquestrar com Maestro</p>
+                      <p className="text-xs text-muted-foreground">
+                        Decompõe a tarefa em subtarefas com dependências gerenciadas pelo Maestro
+                      </p>
+                    </div>
+                    <Button
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      onClick={handleOrchestrate}
+                      disabled={orchestratingTask}
+                    >
+                      {orchestratingTask ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Target className="h-4 w-4 mr-2" />
+                      )}
+                      {orchestratingTask ? 'Orquestrando...' : 'Orquestrar'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : null}
+
               {/* ====== AGENT CARD ====== */}
               <Card>
                 <CardHeader>

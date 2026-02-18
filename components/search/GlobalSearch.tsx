@@ -16,6 +16,7 @@ import {
   ArrowUp,
   ArrowDown,
   CornerDownLeft,
+  Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -69,11 +70,37 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const [results, setResults] = useState<SearchResultsData>({})
   const [loading, setLoading] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [orchestrating, setOrchestrating] = useState(false)
 
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const resultsRef = useRef<SearchResultsHandle>(null)
   const backdropRef = useRef<HTMLDivElement>(null)
+
+  // Orquestração rápida a partir do texto digitado
+  const handleQuickOrchestrate = useCallback(async () => {
+    const title = query.trim()
+    if (!title || title.length < 3 || orchestrating) return
+    setOrchestrating(true)
+    try {
+      const res = await fetch("/api/quick-orchestrate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, priority: "MEDIUM" }),
+      })
+      const data = await res.json()
+      if (!data.success) throw new Error(data.error ?? "Erro ao orquestrar")
+      onOpenChange(false)
+      router.push(data.data.redirectUrl as string)
+    } catch (err) {
+      console.error("[GlobalSearch] quick-orchestrate error:", err)
+      // Fallback: redireciona para /create com o título pré-preenchido via query
+      onOpenChange(false)
+      router.push(`/create?q=${encodeURIComponent(title)}`)
+    } finally {
+      setOrchestrating(false)
+    }
+  }, [query, orchestrating, onOpenChange, router])
 
   // Focar input quando abrir
   useEffect(() => {
@@ -85,6 +112,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
       setQuery("")
       setResults({})
       setActiveIndex(0)
+      setOrchestrating(false)
     }
   }, [open])
 
@@ -129,11 +157,14 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
       )
     : QUICK_ACTIONS
 
-  // Total de itens navegáveis
+  // Ação dinâmica de orquestração — aparece quando query >= 3 chars
+  const showOrchestrateAction = query.trim().length >= 3
+
+  // Total de itens navegáveis (orquestrar conta como +1 se visível)
   const getTotalNavigable = useCallback(() => {
     const resultCount = resultsRef.current?.getTotalCount() ?? 0
-    return resultCount + filteredActions.length
-  }, [filteredActions.length])
+    return resultCount + filteredActions.length + (showOrchestrateAction ? 1 : 0)
+  }, [filteredActions.length, showOrchestrateAction])
 
   // Keyboard navigation
   const handleKeyDown = useCallback(
@@ -168,15 +199,24 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
     if (activeIndex < resultCount) {
       const item = resultsRef.current?.getItemAtIndex(activeIndex)
       if (item) handleSelectResult(item)
-    } else {
-      const actionIdx = activeIndex - resultCount
-      const action = filteredActions[actionIdx]
-      if (action) {
-        onOpenChange(false)
-        router.push(action.href)
-      }
+      return
     }
-  }, [activeIndex, filteredActions, router, onOpenChange])
+
+    const afterResults = activeIndex - resultCount
+
+    // A ação de orquestração é sempre a primeira nas quick actions quando visível
+    if (showOrchestrateAction && afterResults === 0) {
+      handleQuickOrchestrate()
+      return
+    }
+
+    const actionIdx = afterResults - (showOrchestrateAction ? 1 : 0)
+    const action = filteredActions[actionIdx]
+    if (action) {
+      onOpenChange(false)
+      router.push(action.href)
+    }
+  }, [activeIndex, filteredActions, router, onOpenChange, showOrchestrateAction, handleQuickOrchestrate])
 
   const handleSelectResult = useCallback(
     (item: SearchResultItem) => {
@@ -275,15 +315,52 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
           )}
 
           {/* Quick actions */}
-          {filteredActions.length > 0 && (
+          {(showOrchestrateAction || filteredActions.length > 0) && (
             <div>
               <div className="px-3 py-1.5 border-b border-t bg-muted/50">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Ações rápidas
                 </span>
               </div>
+
+              {/* ⚡ Orquestrar: [query] — ação dinâmica */}
+              {showOrchestrateAction && (() => {
+                const orchIdx = resultCount
+                const isActive = orchIdx === activeIndex
+                return (
+                  <button
+                    onClick={handleQuickOrchestrate}
+                    disabled={orchestrating}
+                    className={cn(
+                      "w-full text-left px-3 py-2.5 flex items-center gap-3 transition-colors",
+                      isActive ? "bg-blue-500/10" : "hover:bg-muted/50",
+                      orchestrating && "opacity-60 cursor-not-allowed",
+                    )}
+                  >
+                    {orchestrating ? (
+                      <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+                    ) : (
+                      <Zap className="h-4 w-4 text-blue-500" />
+                    )}
+                    <span className="text-sm flex-1">
+                      <span className="font-medium text-blue-600 dark:text-blue-400">
+                        {orchestrating ? "Criando e orquestrando..." : "⚡ Orquestrar:"}
+                      </span>
+                      {!orchestrating && (
+                        <span className="ml-1 text-foreground">&ldquo;{query.trim()}&rdquo;</span>
+                      )}
+                    </span>
+                    {isActive && !orchestrating && (
+                      <kbd className="shrink-0 px-1.5 py-0.5 rounded border text-[10px] font-mono bg-muted text-muted-foreground">
+                        Enter
+                      </kbd>
+                    )}
+                  </button>
+                )
+              })()}
+
               {filteredActions.map((action, i) => {
-                const idx = resultCount + i
+                const idx = resultCount + (showOrchestrateAction ? 1 : 0) + i
                 const isActive = idx === activeIndex
                 const Icon = action.icon
 

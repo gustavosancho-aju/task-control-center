@@ -30,6 +30,24 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         parent: { select: { id: true, title: true, status: true } },
         subtasks: { select: { id: true, title: true, status: true, priority: true } },
         statusHistory: { orderBy: { changedAt: 'desc' }, take: 20 },
+        ownedOrchestration: {
+          select: {
+            id: true,
+            status: true,
+            totalSubtasks: true,
+            completedSubtasks: true,
+            currentPhase: true,
+          },
+        },
+        orchestration: {
+          select: {
+            id: true,
+            parentTaskId: true,
+            parentTask: { select: { id: true, title: true } },
+          },
+        },
+        dependsOn: { select: { id: true, title: true, status: true } },
+        dependents: { select: { id: true, title: true, status: true } },
       },
     })
     if (!task) {

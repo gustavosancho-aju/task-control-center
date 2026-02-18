@@ -72,6 +72,17 @@ class MaestroOrchestrator {
 
     console.log(`[Maestro] Orquestração iniciada: ${orchestration.id} para tarefa "${task.title}"`)
 
+    // Notifica início da orquestração (evento para clientes subscritos)
+    agentEventEmitter.emit(
+      AgentEventTypes.QUEUE_ADDED,
+      {
+        event: 'orchestration:started',
+        orchestrationId: orchestration.id,
+        taskTitle: task.title,
+      },
+      { taskId }
+    )
+
     try {
       // FASE 1 — Planejamento com IA
       await this._updateOrchestration(orchestration.id, {
@@ -124,6 +135,19 @@ class MaestroOrchestrator {
 
       console.log(`[Maestro] Orquestração ${orchestration.id} em execução com ${subtasks.length} subtarefas`)
 
+      // Notifica que subtarefas foram criadas e orquestração está em execução
+      agentEventEmitter.emit(
+        AgentEventTypes.EXECUTION_STARTED,
+        {
+          event: 'orchestration:executing',
+          orchestrationId: orchestration.id,
+          taskTitle: task.title,
+          totalSubtasks: subtasks.length,
+          phases: plan.phases.map(p => p.name),
+        },
+        { taskId }
+      )
+
       return {
         orchestrationId: orchestration.id,
         subtasksCreated: subtasks.length,
@@ -136,6 +160,19 @@ class MaestroOrchestrator {
         currentPhase: `Erro: ${message}`,
         completedAt: new Date(),
       })
+
+      // Notifica falha no planejamento/setup
+      agentEventEmitter.emit(
+        AgentEventTypes.EXECUTION_FAILED,
+        {
+          event: 'orchestration:failed',
+          orchestrationId: orchestration.id,
+          taskTitle: task.title,
+          error: message,
+        },
+        { taskId }
+      )
+
       throw error
     }
   }
@@ -403,17 +440,54 @@ Formato de resposta (JSON puro):
     })
 
     if (done === total && total > 0) {
+      const parentTask = await prisma.task.findUnique({
+        where: { id: orchestration.parentTaskId },
+        select: { title: true, createdAt: true },
+      })
+
+      const durationMs = parentTask
+        ? Date.now() - new Date(parentTask.createdAt).getTime()
+        : 0
+
       await this._updateOrchestration(orchestrationId, {
         status: 'COMPLETED',
         completedSubtasks: total,
         completedAt: new Date(),
         currentPhase: `Todas as ${total} subtarefas concluídas`,
       })
+
       console.log(`[Maestro] ✅ Orquestração ${orchestrationId} CONCLUÍDA`)
-      agentEventEmitter.emit(AgentEventTypes.EXECUTION_COMPLETED, {}, {
-        taskId: orchestration.parentTaskId,
-      })
+
+      // Notifica conclusão da orquestração (cliente pode usar para toast)
+      agentEventEmitter.emit(
+        AgentEventTypes.EXECUTION_COMPLETED,
+        {
+          event: 'orchestration:completed',
+          orchestrationId,
+          taskTitle: parentTask?.title ?? '',
+          totalSubtasks: total,
+          durationMs,
+        },
+        { taskId: orchestration.parentTaskId }
+      )
       return
+    }
+
+    // Notifica progresso de subtarefa (a cada monitorExecution com nova conclusão)
+    if (done > 0) {
+      const remaining = total - done
+      agentEventEmitter.emit(
+        AgentEventTypes.EXECUTION_PROGRESS,
+        {
+          event: 'orchestration:subtask_completed',
+          orchestrationId,
+          completedCount: done,
+          totalCount: total,
+          remaining,
+          progressPercent: Math.round((done / total) * 100),
+        },
+        { taskId: orchestration.parentTaskId }
+      )
     }
 
     // Detecta travamento: tasks pendentes fora da fila

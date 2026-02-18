@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react"
 import { useQueryClient } from "@tanstack/react-query"
+import Link from "next/link"
 import { Header } from "@/components/layout/Header"
 import { DashboardGrid } from "@/components/dashboard/DashboardGrid"
 import { WidgetPicker } from "@/components/dashboard/WidgetPicker"
@@ -13,6 +14,10 @@ import {
   RotateCcw,
   Plus,
   Loader2,
+  GitMerge,
+  ChevronRight,
+  Activity,
+  Layers,
 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -33,6 +38,174 @@ import {
   type DashboardAgent,
   type DashboardExecution,
 } from "@/types/dashboard"
+
+// ---------------------------------------------------------------------------
+// Active Orchestrations section
+// ---------------------------------------------------------------------------
+
+type OrchStatus =
+  | "PLANNING" | "CREATING_SUBTASKS" | "ASSIGNING_AGENTS"
+  | "EXECUTING" | "REVIEWING" | "COMPLETED" | "FAILED"
+
+interface ActiveOrchestration {
+  id: string
+  status: OrchStatus
+  totalSubtasks: number
+  completedSubtasks: number
+  currentPhase?: string | null
+  createdAt: string
+  parentTask: { id: string; title: string; priority: string }
+}
+
+const ACTIVE_ORCH_STATUSES = new Set<OrchStatus>([
+  "PLANNING", "CREATING_SUBTASKS", "ASSIGNING_AGENTS", "EXECUTING", "REVIEWING",
+])
+
+const ORCH_STATUS_LABELS: Record<OrchStatus, string> = {
+  PLANNING:          "Planejando",
+  CREATING_SUBTASKS: "Criando subtarefas",
+  ASSIGNING_AGENTS:  "Atribuindo agentes",
+  EXECUTING:         "Executando",
+  REVIEWING:         "Revisando",
+  COMPLETED:         "Concluído",
+  FAILED:            "Falhou",
+}
+
+function ActiveOrchCard({ orch }: { orch: ActiveOrchestration }) {
+  const progress = orch.totalSubtasks > 0
+    ? Math.round((orch.completedSubtasks / orch.totalSubtasks) * 100)
+    : 0
+  const isExecuting = orch.status === "EXECUTING"
+
+  return (
+    <Link
+      href={`/orchestration/${orch.id}`}
+      className="block rounded-lg border bg-card p-3.5 hover:border-primary/40 hover:shadow-sm transition-all group"
+    >
+      <div className="flex items-start gap-3">
+        <div className="shrink-0 mt-0.5">
+          {isExecuting ? (
+            <span className="relative flex h-2 w-2 mt-1">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+            </span>
+          ) : (
+            <Loader2 className="h-3.5 w-3.5 text-blue-500 animate-spin" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+            {orch.parentTask.title}
+          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[11px] text-muted-foreground">
+              {ORCH_STATUS_LABELS[orch.status]}
+            </span>
+            {orch.currentPhase && (
+              <span className="text-[11px] text-muted-foreground truncate">
+                · {orch.currentPhase}
+              </span>
+            )}
+          </div>
+          {orch.totalSubtasks > 0 && (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-blue-500 transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">
+                {orch.completedSubtasks}/{orch.totalSubtasks}
+              </span>
+            </div>
+          )}
+        </div>
+        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0 mt-0.5 group-hover:text-primary/60 transition-colors" />
+      </div>
+    </Link>
+  )
+}
+
+function ActiveOrchestrationsSection() {
+  const [orchestrations, setOrchestrations] = useState<ActiveOrchestration[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchActive = useCallback(async () => {
+    try {
+      const res = await fetch("/api/orchestrate?limit=50", { cache: "no-store" })
+      if (!res.ok) return
+      const json = await res.json()
+      if (!json.success) return
+      const active = (json.data as ActiveOrchestration[]).filter(
+        o => ACTIVE_ORCH_STATUSES.has(o.status)
+      )
+      setOrchestrations(active)
+    } catch {
+      // silent
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchActive()
+    const interval = setInterval(fetchActive, 10_000)
+    return () => clearInterval(interval)
+  }, [fetchActive])
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="h-5 w-40 rounded bg-muted animate-pulse" />
+          <div className="h-4 w-16 rounded bg-muted animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {[1,2].map(i => (
+            <div key={i} className="rounded-lg border bg-card p-3.5 animate-pulse space-y-2">
+              <div className="h-4 w-3/4 rounded bg-muted" />
+              <div className="h-3 w-1/2 rounded bg-muted" />
+              <div className="h-1 w-full rounded-full bg-muted" />
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (orchestrations.length === 0) return null
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center h-6 w-6 rounded-md bg-blue-100 dark:bg-blue-900/30">
+            <Activity className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <h2 className="text-sm font-semibold">
+            Orquestrações Ativas
+          </h2>
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-500 px-1.5 text-[10px] font-bold text-white">
+            {orchestrations.length}
+          </span>
+        </div>
+        <Link
+          href="/orchestrations"
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Ver todas
+          <ChevronRight className="h-3 w-3" />
+        </Link>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {orchestrations.map(orch => (
+          <ActiveOrchCard key={orch.id} orch={orch} />
+        ))}
+      </div>
+    </div>
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Mini donut (SVG) — kept as compact dashboard header indicator
@@ -323,6 +496,9 @@ export default function Dashboard() {
             </p>
           </div>
         )}
+
+        {/* ---- Active Orchestrations ---- */}
+        <ActiveOrchestrationsSection />
 
         {/* ---- Dashboard Grid ---- */}
         {loading && !layoutLoaded ? (

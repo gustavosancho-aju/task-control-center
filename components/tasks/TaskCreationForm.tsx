@@ -6,19 +6,48 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Bot, ListTodo } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { Bot, ListTodo, Zap, Eye, Loader2 } from "lucide-react"
 import { TaskAnalysisCard } from "@/components/ai/TaskAnalysisCard"
 import { SubtaskSuggestions } from "@/components/ai/SubtaskSuggestions"
 import { TaskAssistant } from "@/components/ai/TaskAssistant"
 import type { TaskAnalysis, SubtaskSuggestion, TaskImprovement } from "@/types/ai"
 import { notifyAIAnalysis, notifyError } from "@/lib/notifications"
 
-interface TaskCreationFormProps {
-  onSubmit: (task: { title: string; description?: string; priority: string; agentId?: string }) => Promise<void>
-  onCancel?: () => void
+export interface TaskFormData {
+  title: string
+  description?: string
+  priority: string
+  agentId?: string
 }
 
-export function TaskCreationForm({ onSubmit, onCancel }: TaskCreationFormProps) {
+interface TaskCreationFormProps {
+  onSubmit: (task: TaskFormData) => Promise<void>
+  onCancel?: () => void
+  // Maestro / autonomous props
+  autonomousMode?: boolean
+  onToggleAutonomous?: (enabled: boolean) => void
+  onMaestroExecute?: (task: TaskFormData) => Promise<void>
+  maestroExecuting?: boolean
+  onPreviewPlan?: (title: string, description?: string) => void
+  previewLoading?: boolean
+  // Quick orchestrate (single-request create + orchestrate)
+  onQuickOrchestrate?: (task: TaskFormData) => Promise<void>
+  quickOrchestrateLoading?: boolean
+}
+
+export function TaskCreationForm({
+  onSubmit,
+  onCancel,
+  autonomousMode,
+  onToggleAutonomous,
+  onMaestroExecute,
+  maestroExecuting,
+  onPreviewPlan,
+  previewLoading,
+  onQuickOrchestrate,
+  quickOrchestrateLoading,
+}: TaskCreationFormProps) {
   // Form states
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -295,19 +324,102 @@ export function TaskCreationForm({ onSubmit, onCancel }: TaskCreationFormProps) 
                 <ListTodo className="h-4 w-4" />
                 {loadingSubtasks ? "Sugerindo..." : "📋 Sugerir Subtarefas"}
               </Button>
+
+              {onPreviewPlan && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onPreviewPlan(title.trim(), description.trim() || undefined)}
+                  disabled={previewLoading || !title.trim() || title.trim().length < 3}
+                  className="gap-2"
+                >
+                  {previewLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                  {previewLoading ? "Gerando preview..." : "🗺️ Preview do Plano"}
+                </Button>
+              )}
             </div>
 
             <Separator />
 
+            {/* Autonomous Mode Toggle */}
+            {onToggleAutonomous && (
+              <div className="flex items-center justify-between rounded-lg border border-dashed p-3 bg-muted/30">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Zap className="h-4 w-4 text-amber-500" />
+                    Modo Autônomo
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Após criar, Maestro orquestra e executa automaticamente
+                  </p>
+                </div>
+                <Switch
+                  checked={autonomousMode ?? false}
+                  onCheckedChange={onToggleAutonomous}
+                />
+              </div>
+            )}
+
             {/* Form Actions */}
-            <div className="flex gap-2 justify-end">
+            <div className="flex gap-2 justify-end flex-wrap">
               {onCancel && (
                 <Button type="button" variant="outline" onClick={onCancel}>
                   Cancelar
                 </Button>
               )}
-              <Button type="submit" disabled={loading || !title.trim()}>
-                {loading ? "Criando..." : "Criar Tarefa"}
+              {onMaestroExecute && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={maestroExecuting || loading || quickOrchestrateLoading || !title.trim()}
+                  onClick={async () => {
+                    if (!title.trim()) return
+                    await onMaestroExecute({
+                      title: title.trim(),
+                      description: description.trim() || undefined,
+                      priority,
+                      agentId: suggestedAgentId,
+                    })
+                  }}
+                  className="gap-2 border-primary/50 text-primary hover:bg-primary/5"
+                >
+                  {maestroExecuting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Zap className="h-4 w-4" />
+                  )}
+                  {maestroExecuting ? "Orquestrando..." : "Executar com Maestro"}
+                </Button>
+              )}
+              {onQuickOrchestrate && (
+                <Button
+                  type="button"
+                  disabled={quickOrchestrateLoading || maestroExecuting || loading || !title.trim()}
+                  onClick={async () => {
+                    if (!title.trim()) return
+                    await onQuickOrchestrate({
+                      title: title.trim(),
+                      description: description.trim() || undefined,
+                      priority,
+                      agentId: suggestedAgentId,
+                    })
+                  }}
+                  className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {quickOrchestrateLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Zap className="h-4 w-4" />
+                  )}
+                  {quickOrchestrateLoading ? "Criando e orquestrando..." : "⚡ Criar e Orquestrar"}
+                </Button>
+              )}
+              <Button type="submit" disabled={loading || quickOrchestrateLoading || !title.trim()}>
+                {loading ? "Criando..." : autonomousMode ? "Criar e Executar" : "Criar Tarefa"}
               </Button>
             </div>
           </form>
