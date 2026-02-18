@@ -11,6 +11,7 @@ import { RefreshCw } from "lucide-react"
 import { notifyStatusChanged, notifyError } from "@/lib/notifications"
 import { useTasks } from "@/lib/hooks/use-tasks"
 import { useAgents } from "@/lib/hooks/use-agents"
+import { useTaskUpdates } from "@/lib/hooks/use-task-updates"
 import { KanbanBoardSkeleton } from "@/components/ui/skeletons"
 
 interface Task {
@@ -28,6 +29,7 @@ interface Task {
 export default function KanbanPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
+  useTaskUpdates() // SSE: atualiza automaticamente quando agentes mudam status
   const tasksQuery = useTasks({ limit: 100 })
   const agentsQuery = useAgents()
   const tasks = (tasksQuery.data?.data ?? []) as Task[]

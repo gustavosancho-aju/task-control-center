@@ -26,6 +26,7 @@ import { notifyError, notifySuccess, notifyInfo } from "@/lib/notifications"
 import { useTasks } from "@/lib/hooks/use-tasks"
 import { useAgents } from "@/lib/hooks/use-agents"
 import { useActiveExecutions } from "@/lib/hooks/use-executions"
+import { useTaskUpdates } from "@/lib/hooks/use-task-updates"
 import { DashboardSkeleton } from "@/components/ui/skeletons"
 import {
   DEFAULT_DASHBOARD_LAYOUT,
@@ -304,6 +305,7 @@ function saveLayoutToServer(layout: DashboardLayout) {
 
 export default function Dashboard() {
   const queryClient = useQueryClient()
+  useTaskUpdates() // SSE: atualiza automaticamente quando agentes mudam status
 
   // React Query hooks
   const tasksQuery = useTasks({ limit: 100 })

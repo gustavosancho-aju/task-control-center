@@ -41,6 +41,7 @@ export function useTasks(filters: TaskFilters = {}) {
   return useQuery({
     queryKey: ["tasks", filters],
     queryFn: () => fetchTasks(filters),
+    refetchInterval: 10_000, // Polling fallback: refetch a cada 10s
   })
 }
 
