@@ -160,10 +160,15 @@ class ExecutionEngine {
 
       // Atualiza task para DONE em caso de sucesso
       if (result.success) {
-        await prisma.task.update({
-          where: { id: taskId },
-          data: { status: 'DONE' },
-        }).catch(() => {})
+        try {
+          await prisma.task.update({
+            where: { id: taskId },
+            data: { status: 'DONE', completedAt: new Date() },
+          })
+          console.log(`[ExecutionEngine] Task "${task.title}" marcada como DONE`)
+        } catch (err) {
+          console.error(`[ExecutionEngine] Falha ao marcar task ${taskId} como DONE:`, err)
+        }
       }
 
       agentEventEmitter.emit(
@@ -178,10 +183,13 @@ class ExecutionEngine {
       )
 
       // Hook de orquestração: libera dependências e verifica conclusão de fase
+      // SÍNCRONO — não usar fire-and-forget para garantir que dependências sejam desbloqueadas
       if (result.success) {
-        this.onExecutionCompleted(task, result).catch(err =>
+        try {
+          await this.onExecutionCompleted(task, result)
+        } catch (err) {
           console.error('[ExecutionEngine] onExecutionCompleted error:', err)
-        )
+        }
       }
 
       // Auto-comment do agente na tarefa
@@ -329,14 +337,15 @@ class ExecutionEngine {
       })
 
       if (result.success) {
-        await prisma.task.update({
-          where: { id: execution.taskId },
-          data: { status: 'DONE' },
-        }).catch(() => {})
-
-        this.onExecutionCompleted(execution.task, result).catch(err =>
+        try {
+          await prisma.task.update({
+            where: { id: execution.taskId },
+            data: { status: 'DONE', completedAt: new Date() },
+          })
+          await this.onExecutionCompleted(execution.task, result)
+        } catch (err) {
           console.error('[ExecutionEngine] onExecutionCompleted error:', err)
-        )
+        }
       }
 
       return result
