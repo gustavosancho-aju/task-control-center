@@ -1,5 +1,5 @@
 import prisma from '@/lib/db'
-import { createClaudeMessage } from '@/lib/ai/claude-client'
+import { createClaudeMessage, CLAUDE_MODELS } from '@/lib/ai/claude-client'
 import { agentEventEmitter, AgentEventTypes } from '@/lib/agents/event-emitter'
 import { dependencyManager } from '@/lib/agents/dependency-manager'
 import type { OrchestrationPlan, Phase } from '@/lib/agents/maestro-orchestrator'
@@ -34,6 +34,8 @@ export interface ExecutionContext {
 export interface AgentCapability {
   name: string
   description: string
+  /** Opcional: retorna false para pular esta capability para a tarefa atual */
+  condition?: (task: Task, context: ExecutionContext) => boolean | Promise<boolean>
   execute: (task: Task, context: ExecutionContext) => Promise<ExecutionResult>
 }
 
@@ -573,21 +575,37 @@ class ExecutionEngine {
 
     const systemPrompt = ROLE_SYSTEM_PROMPTS['SENTINEL']
     const phaseName = reviewTask.title.replace('[REVIEW] ', '')
-    const prompt = `Você está realizando o review de qualidade da fase "${phaseName}" de uma orquestração de desenvolvimento.
 
-Tarefas concluídas nesta fase:
-${completedTasks.map(t => `- ${t.title}`).join('\n')}
+    // Busca resultados das execuções para enriquecer o contexto do review
+    const executions = await prisma.agentExecution.findMany({
+      where: { taskId: { in: completedTasks.map(t => t.id) }, status: 'COMPLETED' },
+      select: { taskId: true, result: true },
+    })
+    const execResultMap = new Map(executions.map(e => [e.taskId, e.result]))
 
-Avalie se as tarefas foram concluídas adequadamente e se a qualidade é aceitável para prosseguir para a próxima fase.
+    const tasksWithResults = completedTasks.map(t => {
+      const result = execResultMap.get(t.id)
+      const summary = result ? `\n  Resultado: ${String(result).slice(0, 300)}` : '\n  (sem resultado registrado)'
+      return `- ${t.title}${summary}`
+    }).join('\n')
+
+    const prompt = `Você está realizando o review de qualidade da fase "${phaseName}" de uma orquestração de desenvolvimento de software.
+
+CONTEXTO IMPORTANTE: Este é um sistema de orquestração de tarefas com agentes de IA. As tarefas são executadas por agentes especializados (ARCHITECTON, PIXEL, MAESTRO, etc.) que produzem especificações, designs e planos — não arquivos de código-fonte físicos. Os "resultados" abaixo são as saídas dos agentes.
+
+Tarefas concluídas nesta fase com seus resultados:
+${tasksWithResults}
+
+CRITÉRIO DE APROVAÇÃO: Se os agentes reportaram conclusão bem-sucedida e os resultados indicam progresso real no projeto, APROVE a fase. Só use REPROVADO se os resultados mostrarem erros explícitos, falhas críticas ou ausência total de output.
 
 Responda com uma das seguintes decisões na primeira linha:
-- APROVADO: se a fase passou no review e a próxima fase pode iniciar
-- REPROVADO: se foram encontrados problemas que precisam de correção
+- APROVADO: se os agentes concluíram as tarefas com sucesso
+- REPROVADO: apenas se houver erros explícitos ou falhas críticas nos resultados
 
-Seguido de um feedback detalhado justificando sua decisão.`
+Seguido de um breve feedback (máx. 3 linhas) justificando sua decisão.`
 
     try {
-      const response = await createClaudeMessage(prompt, systemPrompt)
+      const response = await createClaudeMessage(prompt, systemPrompt, { model: CLAUDE_MODELS.haiku, maxTokens: 512 })
       const approved = response.toUpperCase().trimStart().startsWith('APROVADO')
 
       // Salva o resultado do review como comentário na task
@@ -733,6 +751,15 @@ Seguido de um feedback detalhado justificando sua decisão.`
 
       if (!this.activeExecutions.has(context.execution.id)) {
         return { success: false, error: 'Execução cancelada durante processamento' }
+      }
+
+      // Verifica condição antes de executar (se definida)
+      if (cap.condition) {
+        const applies = await cap.condition(task, context)
+        if (!applies) {
+          await context.log('INFO', `Capacidade "${cap.name}" ignorada (condição não atendida para esta tarefa)`)
+          continue
+        }
       }
 
       await context.log('INFO', `Executando capacidade: ${cap.name}`)

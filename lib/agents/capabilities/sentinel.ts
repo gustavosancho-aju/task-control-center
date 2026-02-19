@@ -161,6 +161,19 @@ Para cada vulnerabilidade encontrada:
 export const reviewLandingPage: AgentCapability = {
   name: 'reviewLandingPage',
   description: 'Revisa landing page gerada: SEO, acessibilidade, performance e segurança',
+  condition: async (task: Task) => {
+    // Só executa se houver output PIXEL na orquestração (arquivos de landing page)
+    if (!task.orchestrationId) return false
+    const pixelExec = await prisma.agentExecution.findFirst({
+      where: {
+        task: { orchestrationId: task.orchestrationId },
+        agent: { role: 'PIXEL' },
+        status: 'COMPLETED',
+      },
+      select: { id: true },
+    })
+    return !!pixelExec
+  },
   async execute(task: Task, ctx: ExecutionContext): Promise<ExecutionResult> {
     await ctx.log('INFO', 'Iniciando revisão de landing page')
     await ctx.updateProgress(10)

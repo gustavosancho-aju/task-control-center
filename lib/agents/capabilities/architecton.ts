@@ -147,6 +147,11 @@ Para cada recomendação:
 export const planLandingPage: AgentCapability = {
   name: 'planLandingPage',
   description: 'Cria plano arquitetural completo para landing page com seções, paleta, fontes e CTAs',
+  condition: (task: Task) => {
+    const t = (task.title ?? '').toLowerCase()
+    const d = (task.description ?? '').toLowerCase()
+    return t.includes('landing page') || t.includes('landingpage') || d.includes('landing page')
+  },
   async execute(task: Task, ctx: ExecutionContext): Promise<ExecutionResult> {
     await ctx.log('INFO', 'Iniciando planejamento de landing page')
     await ctx.updateProgress(10)
