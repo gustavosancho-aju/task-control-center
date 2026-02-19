@@ -156,6 +156,17 @@ class ExecutionEngine {
       await context.updateProgress(100)
 
       const finalStatus = result.success ? 'COMPLETED' as const : 'FAILED' as const
+
+      // Busca metadata atual para mesclar (preserva files salvo por capabilities como PIXEL)
+      const currentExec = await prisma.agentExecution.findUnique({
+        where: { id: execution.id },
+        select: { metadata: true },
+      })
+      const existingMeta = (currentExec?.metadata as Record<string, unknown>) ?? {}
+      const newMeta = result.artifacts
+        ? { ...existingMeta, artifacts: result.artifacts }
+        : Object.keys(existingMeta).length > 0 ? existingMeta : undefined
+
       await prisma.agentExecution.update({
         where: { id: execution.id },
         data: {
@@ -163,7 +174,7 @@ class ExecutionEngine {
           completedAt: new Date(),
           result: result.result ?? null,
           error: result.error ?? null,
-          metadata: result.artifacts ? { artifacts: result.artifacts } : undefined,
+          metadata: newMeta,
         },
       })
 
