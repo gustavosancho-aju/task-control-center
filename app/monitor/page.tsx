@@ -38,7 +38,7 @@ import {
 // Types
 // ============================================================================
 
-type AgentRole = "MAESTRO" | "SENTINEL" | "ARCHITECTON" | "PIXEL"
+type AgentRole = "MAESTRO" | "SENTINEL" | "ARCHITECTON" | "PIXEL" | "FINISH"
 
 interface AgentInfo {
   id: string
@@ -90,6 +90,7 @@ const ROLE_COLORS: Record<AgentRole, string> = {
   SENTINEL: ROLE_COLOR_MAP.SENTINEL.monitor,
   ARCHITECTON: ROLE_COLOR_MAP.ARCHITECTON.monitor,
   PIXEL: ROLE_COLOR_MAP.PIXEL.monitor,
+  FINISH: ROLE_COLOR_MAP.FINISH.monitor,
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -620,7 +621,7 @@ export default function MonitorPage() {
                       <div className="flex-1 bg-muted rounded-full h-5 overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${
-                            ROLE_COLORS[agent.role].split(" ")[0]
+                            ROLE_COLORS[agent.role]?.split(" ")[0] ?? "bg-muted-foreground"
                           }`}
                           style={{ width: `${pct}%` }}
                         />
@@ -660,7 +661,7 @@ export default function MonitorPage() {
                         </td>
                         <td className="px-4 py-2.5">
                           {agent ? (
-                            <Badge variant="outline" className={`text-xs ${ROLE_COLORS[agent.role]}`}>
+                            <Badge variant="outline" className={`text-xs ${ROLE_COLORS[agent.role] ?? ""}`}>
                               {agent.name}
                             </Badge>
                           ) : (
@@ -735,7 +736,7 @@ export default function MonitorPage() {
                         </td>
                         <td className="px-4 py-2.5">
                           {exec.agent ? (
-                            <Badge variant="outline" className={`text-xs ${ROLE_COLORS[exec.agent.role]}`}>
+                            <Badge variant="outline" className={`text-xs ${ROLE_COLORS[exec.agent.role] ?? ""}`}>
                               {exec.agent.name}
                             </Badge>
                           ) : (
