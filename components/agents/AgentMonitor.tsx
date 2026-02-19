@@ -21,7 +21,7 @@ import {
 // Types
 // ============================================================================
 
-type AgentRole = 'MAESTRO' | 'SENTINEL' | 'ARCHITECTON' | 'PIXEL'
+type AgentRole = 'MAESTRO' | 'SENTINEL' | 'ARCHITECTON' | 'PIXEL' | 'FINISH'
 
 interface Agent {
   id: string
@@ -65,6 +65,7 @@ const ROLE_CONFIG: Record<AgentRole, { icon: string; color: string; bg: string; 
   SENTINEL: { icon: '🛡️', color: 'text-green-700', bg: 'bg-green-50', border: 'border-green-200' },
   ARCHITECTON: { icon: '🏗️', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200' },
   PIXEL: { icon: '🎨', color: 'text-pink-700', bg: 'bg-pink-50', border: 'border-pink-200' },
+  FINISH: { icon: '🚀', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' },
 }
 
 // ============================================================================
@@ -269,7 +270,7 @@ export function AgentMonitor({ agentId }: AgentMonitorProps) {
     )
   }
 
-  const roleConfig = ROLE_CONFIG[agent.role]
+  const roleConfig = ROLE_CONFIG[agent.role] ?? { icon: '🤖', color: 'text-gray-700', bg: 'bg-gray-50', border: 'border-gray-200' }
 
   // --------------------------------------------------------------------------
   // Render
