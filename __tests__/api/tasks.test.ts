@@ -56,7 +56,7 @@ const mockTask = {
   _count: { statusHistory: 0 },
 }
 
-function makeRequest(url: string, options?: RequestInit) {
+function makeRequest(url: string, options?: Omit<RequestInit, 'signal'> & { signal?: AbortSignal }) {
   return new NextRequest(new URL(url, 'http://localhost:3000'), options)
 }
 

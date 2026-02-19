@@ -5,7 +5,7 @@
  * They are integration tests that make real API calls.
  */
 
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 import {
   getClaudeClient,
   getClaudeModel,
