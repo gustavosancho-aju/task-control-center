@@ -4,6 +4,7 @@ import { UpdateTaskSchema } from '@/lib/utils/validators'
 import { TaskStatus } from '@prisma/client'
 import { logTaskUpdate, logTaskDelete, logStatusChange, logTaskComplete } from '@/lib/audit/logger'
 import { cache } from '@/lib/cache'
+import { dependencyManager } from '@/lib/agents/dependency-manager'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -123,6 +124,20 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
       if (data.status === 'DONE') {
         logTaskComplete(id, task.title)
+
+        // Atualizar item na fila (se existir)
+        const queueItem = await prisma.agentQueue.findUnique({ where: { taskId: id } })
+        if (queueItem && queueItem.status !== 'COMPLETED') {
+          await prisma.agentQueue.update({
+            where: { taskId: id },
+            data: { status: 'COMPLETED' },
+          })
+        }
+
+        // Notificar DependencyManager para desbloquear dependentes
+        dependencyManager.onTaskCompleted(id).catch(err =>
+          console.error('[PATCH /tasks] onTaskCompleted error:', err)
+        )
       }
     }
 

@@ -72,6 +72,13 @@ Analise a tarefa e proponha uma solução arquitetural.`,
 - Design systems e padrões visuais
 - Acessibilidade e experiência do usuário
 Analise a tarefa e proponha melhorias de interface.`,
+
+  FINISH: `Você é o FINISH, especialista em finalização e deploy:
+- Consolidação de artefatos gerados por outros agentes
+- Deploy automatizado no Vercel
+- Validação de integridade dos arquivos
+- Entrega de URLs públicas e relatórios finais
+Sua função é garantir que tudo esteja publicado e acessível.`,
 }
 
 // ============================================================================

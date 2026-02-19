@@ -362,6 +362,7 @@ enum AgentRole {
   SENTINEL     // Revisor/Qualidade
   ARCHITECTON  // Arquiteto
   PIXEL        // Designer
+  FINISH       // Deploy/Entrega
 }
 
 enum ExecutionStatus {

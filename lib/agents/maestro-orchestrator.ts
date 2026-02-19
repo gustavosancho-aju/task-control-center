@@ -190,16 +190,23 @@ Agentes disponíveis:
 - MAESTRO: Planejamento, coordenação, roadmaps, gestão de projetos, documentação técnica
 - SENTINEL: Code review, testes unitários/integração/E2E, segurança, performance, qualidade
 - ARCHITECTON: Arquitetura de sistemas, banco de dados, infraestrutura, APIs, decisões técnicas estruturais
-- PIXEL: UI/UX, componentes visuais, CSS, design systems, responsividade, acessibilidade
+- PIXEL: UI/UX, componentes visuais, CSS, design systems, responsividade, acessibilidade, geração de landing pages
+- FINISH: Deploy e entrega — publica artefatos no Vercel e retorna URL pública
 
 Regras obrigatórias:
 1. Crie subtarefas ATÔMICAS — cada uma deve ser executável por um único agente
-2. Agrupe em 2-3 fases lógicas (ex: Planejamento → Implementação → Revisão)
+2. Agrupe em 2-3 fases lógicas (ex: Planejamento → Implementação → Revisão/Deploy)
 3. "dependsOn" deve conter TÍTULOS EXATOS de outras subtarefas deste plano
-4. Estime horas de forma realista (ARCHITECTON: 2-4h, PIXEL: 1-3h, SENTINEL: 1-2h)
+4. Estime horas de forma realista (ARCHITECTON: 2-4h, PIXEL: 1-3h, SENTINEL: 1-2h, FINISH: 0.5h)
 5. Máximo de 4 subtarefas por fase, 3 fases no total
 6. Prioridades válidas: "LOW", "MEDIUM", "HIGH", "URGENT"
-7. Roles válidos: "MAESTRO", "SENTINEL", "ARCHITECTON", "PIXEL"
+7. Roles válidos: "MAESTRO", "SENTINEL", "ARCHITECTON", "PIXEL", "FINISH"
+8. OBRIGATÓRIO para tarefas de landing page/site/página: use EXATAMENTE 4 subtarefas nesta ordem:
+   - ARCHITECTON: "Planejar arquitetura da landing page" (define seções, paleta, fontes, estrutura)
+   - PIXEL: "Gerar código da landing page" (gera HTML, CSS e JS completos) — depende de ARCHITECTON
+   - SENTINEL: "Revisar qualidade da landing page" (SEO, acessibilidade, performance) — depende de PIXEL
+   - FINISH: "Deploy da landing page no Vercel" (publica e retorna URL) — depende de SENTINEL
+   NÃO crie subtarefas adicionais para landing pages. São EXATAMENTE 4, uma por agente.
 
 RETORNE APENAS JSON VÁLIDO, sem markdown, sem comentários.`
 

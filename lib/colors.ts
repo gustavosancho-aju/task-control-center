@@ -110,6 +110,11 @@ export const ROLE_COLORS = {
     soft: "text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-900/30 dark:border-purple-800",
     monitor: "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300",
   },
+  FINISH: {
+    badge: "bg-emerald-600 dark:bg-emerald-700 text-white",
+    soft: "text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/30 dark:border-emerald-800",
+    monitor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  },
 } as const
 
 export type AgentRole = keyof typeof ROLE_COLORS

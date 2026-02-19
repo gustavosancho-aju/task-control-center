@@ -144,7 +144,46 @@ Para cada recomendação:
   },
 }
 
+export const planLandingPage: AgentCapability = {
+  name: 'planLandingPage',
+  description: 'Cria plano arquitetural completo para landing page com seções, paleta, fontes e CTAs',
+  async execute(task: Task, ctx: ExecutionContext): Promise<ExecutionResult> {
+    await ctx.log('INFO', 'Iniciando planejamento de landing page')
+    await ctx.updateProgress(10)
+
+    try {
+      const prompt = `Crie um plano técnico DETALHADO para uma landing page baseada neste briefing:
+
+**Tarefa:** ${task.title}
+**Briefing:** ${task.description || 'Landing page institucional'}
+
+Defina com PRECISÃO (os valores serão usados diretamente no código):
+
+1. **Estrutura de seções** (em ordem): liste cada seção com seu propósito
+2. **Paleta de cores exata** (hex codes): primary, secondary, accent, background, text
+3. **Fontes Google** (títulos e corpo): nomes exatos das fontes
+4. **Headline principal** (máx 8 palavras) e subtítulo (2 linhas)
+5. **Textos dos CTAs** (botões de ação)
+6. **Tom de voz**: profissional, casual, premium, etc.
+7. **Elementos obrigatórios**: hero com gradient, cards de serviços, depoimentos, FAQ, formulário de contato, botão WhatsApp fixo
+8. **Stack técnica**: HTML5 semântico + CSS3 puro + JS vanilla (sem frameworks)
+
+Seja ESPECÍFICO com cores, textos e fontes — eles serão usados diretamente no código gerado.`
+
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      await ctx.log('INFO', 'Plano de landing page concluído')
+      await ctx.updateProgress(90)
+      return { success: true, result, artifacts: ['landing-page-plan.md'] }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
+      await ctx.log('ERROR', `Falha no planejamento: ${msg}`)
+      return { success: false, error: msg }
+    }
+  },
+}
+
 export const architectonCapabilities: AgentCapability[] = [
+  planLandingPage,
   designSystem,
   createSchema,
   documentArchitecture,

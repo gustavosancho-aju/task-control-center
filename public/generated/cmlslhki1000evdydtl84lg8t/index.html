@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Agende Seu Horário em Segundos - Sistema inteligente de agendamento que conecta você aos melhores profissionais de forma rápida e segura.">
+    <meta name="keywords" content="agendamento, consulta, horário, profissionais, online, rápido">
+    <meta name="author" content="Synkra AIOS">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://agendamento.synkra.com">
+    <meta property="og:title" content="Agende Seu Horário em Segundos">
+    <meta property="og:description" content="Sistema inteligente de agendamento que conecta você aos melhores profissionais de forma rápida e segura.">
+    <meta property="og:image" content="https://agendamento.synkra.com/og-image.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://agendamento.synkra.com">
+    <meta property="twitter:title" content="Agende Seu Horário em Segundos">
+    <meta property="twitter:description" content="Sistema inteligente de agendamento que conecta você aos melhores profissionais de forma rápida e segura.">
+    <meta property="twitter:image" content="https://agendamento.synkra.com/og-image.jpg">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📅%3C/text%3E%3C/svg%3E">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css">
+    
+    <title>Agende Seu Horário em Segundos | Synkra AIOS</title>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__container">
+                <div class="nav__logo">
+                    <a href="#home" class="nav__logo-link">
+                        <span class="nav__logo-icon">📅</span>
+                        <span class="nav__logo-text">AgendaFácil</span>
+                    </a>
+                </div>
+                <ul class="nav__menu" id="nav-menu">
+                    <li class="nav__item">
+                        <a href="#home" class="nav__link">Início</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="#servicos" class="nav__link">Serviços</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="#sobre" class="nav__link">Sobre</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="#depoimentos" class="nav__link">Depoimentos</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="#faq" class="nav__link">FAQ</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="#contato" class="nav__link nav__link--cta">Agendar</a>
+                    </li>
+                </ul>
+                <button class="nav__toggle" id="nav-toggle">
+                    <span class="nav__toggle-bar"></span>
+                    <span class="nav__toggle-bar"></span>
+                    <span class="nav__toggle-bar"></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="hero__container">
+                <div class="hero__blob" data-animate="scale-up" data-delay="500"></div>
+                <div class="hero__content">
+                    <h1 class="hero__title" data-animate="fade-up" data-delay="100">
+                        Agende Seu Horário em Segundos
+                    </h1>
+                    <p class="hero__subtitle" data-animate="fade-up" data-delay="200">
+                        Sistema inteligente de agendamento que conecta você<br>
+                        aos melhores profissionais de forma rápida e segura.
+                    </p>
+                    <div class="hero__buttons" data-animate="fade-up" data-delay="300">
+                        <a href="#contato" class="hero__btn hero__btn--primary">
+                            Agendar Agora
+                        </a>
+                        <a href="#servicos" class="hero__btn hero__btn--secondary">
+                            Ver Disponibilidade
+                        </a>
+                    </div>
+                </div>
+                <div class="hero__image" data-animate="fade-left" data-delay="400">
+                    <div class="hero__image-placeholder">
+                        <svg width="500" height="400" viewBox="0 0 500 400" fill="none">
+                            <rect width="500" height="400" fill="#2563eb" fill-opacity="0.1" rx="20"/>
+                            <circle cx="250" cy="200" r="60" fill="#2563eb" fill-opacity="0.3"/>
+                            <text x="250" y="210" text-anchor="middle" fill="#2563eb" font-size="24">📅</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Diferenciais/Features Section -->
+        <section class="features">
+            <div class="features__container">
+                <div class="features__header" data-animate="fade-up" data-delay="100">
+                    <h2 class="features__title">Por que escolher nossa plataforma?</h2>
+                    <p class="features__subtitle">Oferecemos a melhor experiência em agendamento online</p>
+                </div>
+                <div class="features__grid">
+                    <div class="features__card" data-animate="fade-up" data-delay="100">
+                        <div class="features__card-icon">⚡</div>
+                        <h3 class="features__card-title">Agendamento Instantâneo</h3>
+                        <p class="features__card-description">
+                            Confirme seu horário em menos de 30 segundos com nossa interface intuitiva
+                        </p>
+                    </div>
+                    <div class="features__card" data-animate="fade-up" data-delay="200">
+                        <div class="features__card-icon">🛡️</div>
+                        <h3 class="features__card-title">100% Seguro</h3>
+                        <p class="features__card-description">
+                            Seus dados são protegidos com criptografia de ponta a ponta
+                        </p>
+                    </div>
+                    <div class="features__card" data-animate="fade-up" data-delay="300">
+                        <div class="features__card-icon">📱</div>
+                        <h3 class="features__card-title">Confirmação por WhatsApp</h3>
+                        <p class="features__card-description">
+                            Receba confirmação e lembretes diretamente no seu WhatsApp
+                        </p>
+                    </div>
+                    <div class="features__card" data-animate="fade-up" data-delay="400">
+                        <div class="features__card-icon">🕒</div>
+                        <h3 class="features__card-title">Flexibilidade Total</h3>
+                        <p class="features__card-description">
+                            Reagende ou cancele seus horários sem complicações
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Serviços Section -->
+        <section class="services" id="servicos">
+            <div class="services__container">
+                <div class="services__header" data-animate="fade-up" data-delay="100">
+                    <h2 class="services__title">Nossos Serviços</h2>
+                    <p class="services__subtitle">Agende os melhores profissionais em diversas áreas</p>
+                </div>
+                <div class="services__grid">
+                    <article class="services__card" data-animate="fade-up" data-delay="100">
+                        <div class="services__card-header">
+                            <div class="services__card-icon">👨‍⚕️</div>
+                            <div class="services__card-badge">Mais Procurado</div>
+                        </div>
+                        <h3 class="services__card-title">Consultas Médicas</h3>
+                        <p class="services__card-description">
+                            Agende consultas com especialistas de diversas áreas médicas
+                        </p>
+                        <ul class="services__card-features">
+                            <li>Clínico Geral</li>
+                            <li>Cardiologista</li>
+                            <li>Dermatologista</li>
+                        </ul>
+                        <button class="services__card-btn">Agendar Consulta</button>
+                    </article>
+
+                    <article class="services__card" data-animate="fade-up" data-delay="200">
+                        <div class="services__card-header">
+                            <div class="services__card-icon">💇‍♀️</div>
+                        </div>
+                        <h3 class="services__card-title">Beleza & Estética</h3>
+                        <p class="services__card-description">
+                            Transforme seu visual com os melhores profissionais de beleza
+                        </p>
+                        <ul class="services__card-features">
+                            <li>Corte e Coloração</li>
+                            <li>Manicure e Pedicure</li>
+                            <li>Tratamentos Faciais</li>
+                        </ul>
+                        <button class="services__card-btn">Agendar Serviço</button>
+                    </article>
+
+                    <article class="services__card" data-animate="fade-up" data-delay="300">
+                        <div class="services__card-header">
+                            <div class="services__card-icon">🏋️‍♂️</div>
+                        </div>
+                        <h3 class="services__card-title">Saúde & Bem-estar</h3>
+                        <p class="services__card-description">
+                            Cuide da sua saúde física e mental com profissionais qualificados
+                        </p>
+                        <ul class="services__card-features">
+                            <li>Personal Trainer</li>
+                            <li>Fisioterapia</li>
+                            <li>Nutricionista</li>
+                        </ul>
+                        <button class="services__card-btn">Agendar Sessão</button>
+                    </article>
+
+                    <article class="services__card" data-animate="fade-up" data-delay="400">
+                        <div class="services__card-header">
+                            <div class="services__card-icon">🔧</div>
+                        </div>
+                        <h3 class="services__card-title">Serviços Técnicos</h3>
+                        <p class="services__card-description">
+                            Resolva problemas técnicos com profissionais especializados
+                        </p>
+                        <ul class="services__card-features">
+                            <li>Assistência Técnica</li>
+                            <li>Consultoria TI</li>
+                            <li>Manutenção</li>
+                        </ul>
+                        <button class="services__card-btn">Solicitar Orçamento</button>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sobre Section -->
+        <section class="about" id="sobre">
+            <div class="about__container">
+                <div class="about__content">
+                    <div class="about__text" data-animate="fade-right" data-delay="100">
+                        <h2 class="about__title">Sobre Nossa Plataforma</h2>
+                        <p class="about__description">
+                            Nascemos com a missão de simplificar a conexão entre pessoas e profissionais. 
+                            Nossa plataforma utiliza tecnologia de ponta para oferecer a melhor experiência 
+                            em agendamentos online.
+                        </p>
+                        <p class="about__description">
+                            Com mais de 5.000 profissionais cadastrados e 50.000 agendamentos realizados, 
+                            somos referência em praticidade e confiabilidade.
+                        </p>
+                        <div class="about__stats">
+                            <div class="about__stat">
+                                <span class="about__stat-number">5K+</span>
+                                <span class="about__stat-label">Profissionais</span>
+                            </div>
+                            <div class="about__stat">
+                                <span class="about__stat-number">50K+</span>
+                                <span class="about__stat-label">Agendamentos</span>
+                            </div>
+                            <div class="about__stat">
+                                <span class="about__stat-number">98%</span>
+                                <span class="about__stat-label">Satisfação</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="about__image" data-animate="fade-left" data-delay="200">
+                        <div class="about__image-placeholder">
+                            <svg width="400" height="300" viewBox="0 0 400 300" fill="none">
+                                <rect width="400" height="300" fill="#f59e0b" fill-opacity="0.1" rx="15"/>
+                                <circle cx="200" cy="150" r="40" fill="#f59e0b" fill-opacity="0.3"/>
+                                <text x="200" y="160" text-anchor="middle" fill="#f59e0b" font-size="20">⭐</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Depoimentos Section -->
+        <section class="testimonials" id="depoimentos">
+            <div class="testimonials__container">
+                <div class="testimonials__header" data-animate="fade-up" data-delay="100">
+                    <h2 class="testimonials__title">O que nossos clientes dizem</h2>
+                    <p class="testimonials__subtitle">Histórias reais de quem já experimentou nossa plataforma</p>
+                </div>
+                <div class="testimonials__grid">
+                    <article class="testimonials__card" data-animate="fade-up" data-delay="100">
+                        <div class="testimonials__card-rating">
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                        </div>
+                        <blockquote class="testimonials__card-quote">
+                            "Nunca foi tão fácil agendar uma consulta! Em menos de 1 minuto já tinha meu horário confirmado."
+                        </blockquote>
+                        <div class="testimonials__card-author">
+                            <div class="testimonials__card-avatar">
+                                <span class="testimonials__avatar-placeholder">👩‍💼</span>
+                            </div>
+                            <div class="testimonials__card-info">
+                                <cite class="testimonials__card-name">Maria Silva</cite>
+                                <span class="testimonials__card-role">Executiva</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="testimonials__card" data-animate="fade-up" data-delay="200">
+                        <div class="testimonials__card-rating">
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                        </div>
+                        <blockquote class="testimonials__card-quote">
+                            "A confirmação pelo WhatsApp é genial! Não preciso mais me preocupar em esquecer o horário."
+                        </blockquote>
+                        <div class="testimonials__card-author">
+                            <div class="testimonials__card-avatar">
+                                <span class="testimonials__avatar-placeholder">👨‍🎓</span>
+                            </div>
+                            <div class="testimonials__card-info">
+                                <cite class="testimonials__card-name">João Santos</cite>
+                                <span class="testimonials__card-role">Estudante</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="testimonials__card" data-animate="fade-up" data-delay="300">
+                        <div class="testimonials__card-rating">
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                            <span class="testimonials__star">⭐</span>
+                        </div>
+                        <blockquote class="testimonials__card-quote">
+                            "Interface super intuitiva e profissionais de qualidade. Já indiquei para toda a família!"
+                        </blockquote>
+                        <div class="testimonials__card-author">
+                            <div class="testimonials__card-avatar">
+                                <span class="testimonials__avatar-placeholder">👩‍⚕️</span>
+                            </div>
+                            <div class="testimonials__card-info">
+                                <cite class="testimonials__card-name">Ana Costa</cite>
+                                <span class="testimonials__card-role">Enfermeira</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Processo/Timeline Section -->
+        <section class="process">
+            <div class="process__container">
+                <div class="process__header" data-animate="fade-up" data-delay="100">
+                    <h2 class="process__title">Como funciona?</h2>
+                    <p class="process__subtitle">Seu agendamento em apenas 4 passos simples</p>
+                </div>
+                <div class="process__timeline">
+                    <div class="process__step" data-animate="fade-up" data-delay="100">
+                        <div class="process__step-number">1</div>
+                        <div class="process__step-content">
+                            <h3 class="process__step-title">Escolha o Serviço</h3>
+                            <p class="process__step-description">
+                                Navegue pelas categorias e selecione o profissional ideal para suas necessidades
+                            </p>
+                        </div>
+                        <div class="process__step-icon">🎯</div>
+                    </div>
+                    
+                    <div class="process__step" data-animate="fade-up" data-delay="200">
+                        <div class="process__step-number">2</div>
+                        <div class="process__step-content">
+                            <h3 class="process__step-title">Selecione Data e Hora</h3>
+                            <p class="process__step-description">
+                                Visualize a disponibilidade em tempo real e escolha o horário que melhor se adapta à sua rotina
+                            </p>
+                        </div>
+                        <div class="process__step-icon">📅</div>
+                    </div>
+                    
+                    <div class="process__step" data-animate="fade-up" data-delay="300">
+                        <div class="process__step-number">3</div>
+                        <div class="process__step-content">
+                            <h3 class="process__step-title">Preencha seus Dados</h3>
+                            <p class="process__step-description">
+                                Informe seus dados básicos e qualquer observação especial sobre o atendimento
+                            </p>
+                        </div>
+                        <div class="process__step-icon">📝</div>
+                    </div>
+                    
+                    <div class="process__step" data-animate="fade-up" data-delay="400">
+                        <div class="process__step-number">4</div>
+                        <div class="process__step-content">
+                            <h3 class="process__step-title">Confirmação Instantânea</h3>
+                            <p class="process__step-description">
+                                Receba a confirmação imediata via WhatsApp e lembretes antes do seu horário
+                            </p>
+                        </div>
+                        <div class="process__step-icon">✅</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="faq" id="faq">
+            <div class="faq__container">
+                <div class="faq__header" data-animate="fade-up" data-delay="100">
+                    <h2 class="faq__title">Perguntas Frequentes</h2>
+                    <p class="faq__subtitle">Tire suas dúvidas sobre nosso sistema de agendamento</p>
+                </div>
+                <div class="faq__list">
+                    <div class="faq__item" data-animate="fade-up" data-delay="100">
+                        <button class="faq__question" data-faq-toggle>
+                            <span>Como funciona o agendamento?</span>
+                            <span class="faq__icon">+</span>
+                        </button>
+                        <div class="faq__answer">
+                            <p>Nosso sistema é muito simples: você escolhe o serviço, seleciona data e hora disponível, preenche seus dados e recebe confirmação instantânea via WhatsApp. Todo o processo leva menos de 2 minutos.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq__item" data-animate="fade-up" data-delay="200">
+                        <button class="faq__question" data-faq-toggle>
+                            <span>Posso remarcar meu horário?</span>
+                            <span class="faq__icon">+</span>
+                        </button>
+                        <div class="faq__answer">
+                            <p>Sim! Você pode remarcar seu horário até 2 horas antes do agendamento. Entre em contato conosco pelo WhatsApp ou através do link que enviamos na confirmação.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq__item" data-animate="fade-up" data-delay="300">
+                        <button class="faq__question" data-faq-toggle>
+                            <span>Quanto tempo antes devo agendar?</span>
+                            <span class="faq__icon">+</span>
+                        </button>
+                        <div class="faq__answer">
+                            <p>Recomendamos agendar com pelo menos 24 horas de antecedência para garantir disponibilidade. Porém, muitos profissionais têm horários disponíveis para o mesmo dia.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq__item" data-animate="fade-up" data-delay="400">
+                        <button class="faq__question" data-faq-toggle>
+                            <span>Como recebo a confirmação?</span>
+                            <span class="faq__icon">+</span>
+                        </button>
+                        <div class="faq__answer">
+                            <p>Você recebe a confirmação imediatamente após o agendamento via WhatsApp. Também enviamos lembretes 24h e 2h antes do seu horário marcado.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq__item" data-animate="fade-up" data-delay="500">
+                        <button class="faq__question" data-faq-toggle>
+                            <span>E se precisar cancelar?</span>
+                            <span class="faq__icon">+</span>
+                        </button>
+                        <div class="faq__answer">
+                            <p>Cancelamentos podem ser feitos até 4 horas antes do horário agendado sem qualquer custo. Após esse período, podem ser aplicadas taxas conforme a política de cada profissional.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq__item" data-animate="fade-up" data-delay="600">
+                        <button class="faq__question" data-faq-toggle>
+                            <span>Há cobrança pelo agendamento?</span>
+                            <span class="faq__icon">+</span>
+                        </button>
+                        <div class="faq__answer">
+                            <p>Não cobramos taxa de agendamento. Você paga apenas pelo serviço contratado diretamente ao profissional. Nosso sistema é totalmente gratuito para os clientes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contato/Footer Section -->
+        <section class="contact" id="contato">
+            <div class="contact__container">
+                <div class="contact__content">
+                    <div class="contact__info" data-animate="fade-right" data-delay="100">
+                        <h2 class="contact__title">Pronto para Agendar?</h2>
+                        <p class="contact__description">
+                            Preencha o formulário ao lado e receba uma confirmação instantânea via WhatsApp. 
+                            É rápido, fácil e seguro!
+                        </p>
+                        <div class="contact__features">
+                            <div class="contact__feature">
+                                <span class="contact__feature-icon">⚡</span>
+                                <span class="contact__feature-text">Confirmação instantânea</span>
+                            </div>
+                            <div class="contact__feature">
+                                <span class="contact__feature-icon">🔒</span>
+                                <span class="contact__feature-text">Dados 100% seguros</span>
+                            </div>
+                            <div class="contact__feature">
+                                <span class="contact__feature-icon">📱</span>
+                                <span class="contact__feature-text">Lembretes automáticos</span>
+                            </div>
+                        </div>
+                        <div class="contact__info-details">
+                            <h3 class="contact__info-title">Outras formas de contato:</h3>
+                            <div class="contact__info-item">
+                                <span class="contact__info-icon">📧</span>
+                                <span>contato@agendafacil.com</span>
+                            </div>
+                            <div class="contact__info-item">
+                                <span class="contact__info-icon">📞</span>
+                                <span>(11) 9 9999-9999</span>
+                            </div>
+                            <div class="contact__info-item">
+                                <span class="contact__info-icon">⏰</span>
+                                <span>Seg-Sex: 8h às 18h | Sáb: 8h às 12h</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form class="contact__form" data-animate="fade-left" data-delay="200" id="contact-form">
+                        <h3 class="contact__form-title">Solicitar Agendamento</h3>
+                        
+                        <div class="contact__form-group">
+                            <label for="nome" class="contact__form-label">Nome Completo *</label>
+                            <input 
+                                type="text" 
+                                id="nome" 
+                                name="nome" 
+                                class="contact__form-input" 
+                                required 
+                                placeholder="Digite seu nome completo"
+                                data-validate="required"
+                            >
+                            <span class="contact__form-error" data-error="nome"></span>
+                        </div>
+
+                        <div class="contact__form-row">
+                            <div class="contact__form-group">
+                                <label for="email" class="contact__form-label">E-mail *</label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    class="contact__form-input" 
+                                    required 
+                                    placeholder="seu@email.com"
+                                    data-validate="email"
+                                >
+                                <span class="contact__form-error" data-error="email"></span>
+                            </div>
+                            
+                            <div class="contact__form-group">
+                                <label for="telefone" class="contact__form-label">WhatsApp *</label>
+                                <input 
+                                    type="tel" 
+                                    id="telefone" 
+                                    name="telefone" 
+                                    class="contact__form-input" 
+                                    required 
+                                    placeholder="(11) 99999-9999"
+                                    data-validate="phone"
+                                >
+                                <span class="contact__form-error" data-error="telefone"></span>
+                            </div>
+                        </div>
+
+                        <div class="contact__form-row">
+                            <div class="contact__form-group">
+                                <label for="servico" class="contact__form-label">Serviço Desejado *</label>
+                                <select id="servico" name="servico" class="contact__form-select" required data-validate="required">
+                                    <option value="">Selecione um serviço</option>
+                                    <option value="consulta-medica

@@ -1,0 +1,181 @@
+```json
+{
+  "hero": {
+    "headline": "Seu Momento de Transformação Começa Aqui",
+    "subtitulo": "Desperte sua melhor versão com tratamentos personalizados que unem técnica, acolhimento e resultados reais. Porque cuidar de você é mais que estética – é bem-estar.",
+    "cta_botao": "💬 Agendar Meu Horário",
+    "microcopy": "✓ Resposta em até 2 horas  |  ✓ Ambiente exclusivo e seguro"
+  },
+
+  "sobre": {
+    "nome": "Ana Beatriz Silva",
+    "titulo": "Especialista em Estética e Bem-Estar",
+    "texto": "Com mais de 10 anos de experiência transformando a autoestima de centenas de clientes, Ana Beatriz é formada em Estética e Cosmética, com especializações em Drenagem Linfática Método Godoy e Maquiagem Profissional.\n\nSeu propósito vai além da técnica: criar um espaço onde cada pessoa se sinta verdadeiramente acolhida, escutada e cuidada. Aqui, cada atendimento é único, pensado para suas necessidades reais, respeitando seu ritmo e sua essência.\n\nAcredito que beleza e saúde caminham juntas. Por isso, combino protocolos comprovados com um toque humanizado que faz toda diferença. Seu bem-estar é minha prioridade – e isso você sente desde o primeiro contato.",
+    "credenciais": [
+      "10+ anos de experiência",
+      "Certificação em Drenagem Linfática",
+      "Especialização em Maquiagem Profissional",
+      "Formação em Estética e Cosmética"
+    ]
+  },
+
+  "servicos": [
+    {
+      "nome": "Massagem Relaxante",
+      "descricao": "Libere tensões acumuladas e reconecte corpo e mente através de manobras suaves e envolventes. Ideal para quem busca alívio do estresse, melhora na qualidade do sono e uma pausa genuína da rotina.",
+      "beneficio_principal": "Reduz ansiedade e tensão muscular profunda",
+      "preco": "R$ 120",
+      "duracao": "60 minutos",
+      "icone": "spa"
+    },
+    {
+      "nome": "Drenagem Linfática",
+      "descricao": "Técnica especializada que estimula o sistema linfático, reduzindo inchaços, celulite e retenção de líquidos. Perfeita para pós-operatório, gestantes (após liberação médica) e quem busca leveza imediata.",
+      "beneficio_principal": "Desincha e renova seu corpo naturalmente",
+      "preco": "R$ 150",
+      "duracao": "60 minutos",
+      "icone": "healing"
+    },
+    {
+      "nome": "Maquiagem Social",
+      "descricao": "Realce sua beleza natural para eventos especiais, festas ou aquele dia em que você merece se sentir radiante. Maquiagem elegante, duradoura e totalmente personalizada para seu estilo e tom de pele.",
+      "beneficio_principal": "Autoestima elevada para momentos inesquecíveis",
+      "preco": "R$ 180",
+      "duracao": "90 minutos",
+      "icone": "brush"
+    },
+    {
+      "nome": "Maquiagem Artística",
+      "descricao": "Para noivas, editoriais, ensaios fotográficos e produções que exigem técnica avançada. Criamos um look impecável que resiste horas e traduz exatamente a emoção do seu momento especial.",
+      "beneficio_principal": "Perfeição fotogênica que emociona e encanta",
+      "preco": "R$ 250",
+      "duracao": "120 minutos",
+      "icone": "palette"
+    }
+  ],
+
+  "proposta_valor": [
+    {
+      "titulo": "Atendimento 100% Personalizado",
+      "descricao": "Nada de protocolos genéricos. Aqui, cada sessão é planejada especialmente para você, suas necessidades e seu momento de vida.",
+      "icone": "person_heart"
+    },
+    {
+      "titulo": "Ambiente Acolhedor e Exclusivo",
+      "descricao": "Espaço intimista, higienizado e pensado nos mínimos detalhes para você se desconectar do mundo e se reconectar consigo mesma.",
+      "icone": "home_heart"
+    },
+    {
+      "titulo": "Técnicas Comprovadas + Toque Humano",
+      "descricao": "Unimos o que há de mais eficaz em estética com cuidado genuíno. Porque resultado sem acolhimento não é o nosso padrão.",
+      "icone": "verified"
+    }
+  ],
+
+  "depoimentos": [
+    {
+      "nome": "Mariana Costa",
+      "idade": 34,
+      "servico": "Drenagem Linfática",
+      "texto": "Estava com muita retenção após a gravidez e a Ana foi um anjo na minha vida! Em 4 sessões já senti diferença absurda. Além da técnica impecável, ela me acolheu de um jeito que eu nem sabia que precisava. Saio de lá renovada, corpo e alma!",
+      "foto": "avatar-mariana.jpg",
+      "estrelas": 5
+    },
+    {
+      "nome": "Juliana Ferreira",
+      "idade": 28,
+      "servico": "Maquiagem para Casamento",
+      "texto": "Fiz minha maquiagem de noiva com a Ana e foi o melhor investimento! Ela entendeu exatamente o que eu queria: natural, mas impecável. Durou o dia inteiro, chorei, dancei, e estava perfeita nas fotos. Meu marido não parava de elogiar! 😍",
+      "foto": "avatar-juliana.jpg",
+      "estrelas": 5
+    },
+    {
+      "nome": "Carla Mendes",
+      "idade": 42,
+      "servico": "Massagem Relaxante",
+      "texto": "Trabalho muito e vivia com dores nas costas e pescoço. A massagem da Ana é terapêutica de verdade! Já virou meu ritual mensal. Ela conhece cada ponto de tensão e sabe exatamente a pressão certa. Indico de olhos fechados!",
+      "foto": "avatar-carla.jpg",
+      "estrelas": 5
+    }
+  ],
+
+  "processo": {
+    "titulo": "Agendar Seu Momento é Simples",
+    "subtitulo": "Em 3 passos rápidos você garante seu horário",
+    "passos": [
+      {
+        "numero": "01",
+        "titulo": "Entre em Contato",
+        "descricao": "Clique no botão do WhatsApp e me conte o que você precisa. Vou responder pessoalmente em até 2 horas."
+      },
+      {
+        "numero": "02",
+        "titulo": "Escolha Data e Horário",
+        "descricao": "Vamos encontrar o melhor encaixe na sua agenda. Flexibilidade para você não perder seu momento de cuidado."
+      },
+      {
+        "numero": "03",
+        "titulo": "Relaxe e Aproveite",
+        "descricao": "No dia marcado, é só chegar. Tudo estará preparado com carinho para você se desconectar e se transformar."
+      }
+    ]
+  },
+
+  "faq": {
+    "titulo": "Dúvidas Frequentes",
+    "subtitulo": "Tudo o que você precisa saber antes de agendar",
+    "perguntas": [
+      {
+        "pergunta": "Qual a política de cancelamento?",
+        "resposta": "Entendo que imprevistos acontecem! Peço apenas que avise com 24 horas de antecedência para não prejudicar outras clientes na lista de espera. Cancelamentos ou reagendamentos podem ser feitos diretamente pelo WhatsApp, sem burocracia."
+      },
+      {
+        "pergunta": "Preciso levar alguma coisa para a sessão?",
+        "resposta": "Não precisa trazer absolutamente nada! Disponibilizo toalhas higienizadas, produtos de qualidade e tudo que você precisa para seu conforto. Para massagens e drenagem, recomendo vir com roupas confortáveis. Para maquiagem, se tiver fotos de referência, pode enviar antes pelo WhatsApp."
+      },
+      {
+        "pergunta": "Gestantes podem fazer drenagem linfática?",
+        "resposta": "Sim! A drenagem é super recomendada para gestantes, especialmente após o terceiro mês, pois alivia inchaços e desconfortos. Porém, é importante ter liberação do seu obstetra. Traga o OK médico na primeira sessão e vou adaptar a técnica para seu momento com total segurança."
+      },
+      {
+        "pergunta": "Como funciona o pagamento?",
+        "resposta": "Aceito dinheiro, PIX e cartões de débito/crédito (em até 3x sem juros). O pagamento é feito após a sessão, tranquilamente. Se quiser garantir desconto, ofereço pacotes especiais – basta perguntar no WhatsApp!"
+      }
+    ]
+  },
+
+  "cta_final": {
+    "headline": "Sua Transformação Não Pode Esperar",
+    "subtitulo": "As agendas enchem rápido! Garanta agora seu horário e dê a você mesma o cuidado que você merece. É hora de se priorizar.",
+    "beneficio": "💝 Agende hoje e ganhe uma avaliação personalizada gratuita",
+    "cta_botao": "💬 Quero Garantir Minha Vaga",
+    "urgencia": "⏰ Apenas 3 vagas disponíveis esta semana"
+  },
+
+  "footer": {
+    "endereco": {
+      "rua": "Rua das Acácias, 847 - Conjunto 12",
+      "bairro": "Vila Mariana",
+      "cidade": "São Paulo - SP",
+      "cep": "04042-003"
+    },
+    "horarios": {
+      "titulo": "Horário de Atendimento",
+      "dias_semana": "Segunda a Sexta: 9h às 19h",
+      "sabado": "Sábados: 9h às 14h",
+      "observacao": "Atendimento mediante agendamento prévio"
+    },
+    "contato": {
+      "whatsapp": "(11) 99999-8888",
+      "email": "contato@anabeatrizsilva.com.br"
+    },
+    "redes_sociais": {
+      "instagram": "@anabeatriz.estetica",
+      "facebook": "/anabeatrizestetica",
+      "titulo": "Nos acompanhe"
+    },
+    "links_uteis": [
+      {
+        "texto": "Política de Privacidade",
+        "url": "#privacidade"
+      },

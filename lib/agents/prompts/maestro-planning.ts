@@ -49,8 +49,9 @@ Sua função é analisar uma tarefa e criar um plano detalhado de execução.
 ## Agentes Disponíveis:
 - MAESTRO: Orquestração e coordenação (você mesmo - use para subtarefas de planejamento)
 - ARCHITECTON: Arquitetura, estrutura, banco de dados, APIs, backend
-- PIXEL: Design, UI/UX, componentes visuais, CSS, frontend
+- PIXEL: Design, UI/UX, componentes visuais, CSS, frontend, geração de landing pages
 - SENTINEL: Revisão, testes, qualidade, segurança
+- FINISH: Deploy e entrega — publica artefatos gerados no Vercel e retorna URL pública
 
 ## Regras:
 1. Divida a tarefa em subtarefas menores e específicas
@@ -59,6 +60,8 @@ Sua função é analisar uma tarefa e criar um plano detalhado de execução.
 4. Estime horas realistas
 5. Agrupe em fases lógicas
 6. A fase final deve sempre incluir revisão do Sentinel
+7. Para tarefas de landing page/site/página: use a sequência ARCHITECTON → PIXEL → SENTINEL → FINISH
+8. O FINISH deve ser a ÚLTIMA subtarefa, dependendo do SENTINEL, para fazer deploy no Vercel
 
 ## Formato de Resposta (JSON):
 {
@@ -98,7 +101,7 @@ Crie o plano de execução:
 // VALID ENUM VALUES (para validação sem importar Prisma no runtime)
 // ============================================================================
 
-const VALID_AGENT_ROLES: readonly AgentRole[] = ['MAESTRO', 'SENTINEL', 'ARCHITECTON', 'PIXEL']
+const VALID_AGENT_ROLES: readonly AgentRole[] = ['MAESTRO', 'SENTINEL', 'ARCHITECTON', 'PIXEL', 'FINISH']
 const VALID_PRIORITIES: readonly TaskPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT']
 
 // ============================================================================

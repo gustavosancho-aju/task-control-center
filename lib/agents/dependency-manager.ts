@@ -3,6 +3,7 @@ import prisma from '@/lib/db'
 import { queueManager } from '@/lib/agents/queue-manager'
 import { agentEventEmitter, AgentEventTypes } from '@/lib/agents/event-emitter'
 import type { OrchestrationPlan } from '@/lib/agents/maestro-orchestrator'
+import { cache } from '@/lib/cache'
 
 // ============================================================================
 // TYPES
@@ -486,6 +487,31 @@ class DependencyManager {
           { orchestrationId, totalSubtasks: total },
           { taskId: orchestration.parentTaskId }
         )
+
+        // Auto-complete: marcar task pai como DONE
+        if (orchestration.parentTaskId) {
+          const parentTask = await prisma.task.findUnique({
+            where: { id: orchestration.parentTaskId },
+            select: { status: true },
+          })
+          if (parentTask && parentTask.status !== 'DONE') {
+            await prisma.task.update({
+              where: { id: orchestration.parentTaskId },
+              data: { status: 'DONE', completedAt: new Date() },
+            })
+            await prisma.statusChange.create({
+              data: {
+                taskId: orchestration.parentTaskId,
+                fromStatus: parentTask.status,
+                toStatus: 'DONE',
+                notes: `Concluída automaticamente — todas as ${total} subtarefas finalizadas`,
+              },
+            })
+            cache.invalidatePattern('tasks:*')
+            console.log(`[DependencyManager] ✅ Task pai auto-completada (${total} subtarefas concluídas)`)
+          }
+        }
+
         console.log(`[DependencyManager] 🎉 Orquestração ${orchestrationId} CONCLUÍDA (${total} subtarefas)`)
       }
     }

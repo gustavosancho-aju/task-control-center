@@ -3,6 +3,7 @@ import { maestroCapabilities } from './maestro'
 import { sentinelCapabilities } from './sentinel'
 import { architectonCapabilities } from './architecton'
 import { pixelCapabilities } from './pixel'
+import { finishCapabilities } from './finish'
 
 export function registerAllCapabilities(): void {
   for (const cap of maestroCapabilities) {
@@ -17,9 +18,13 @@ export function registerAllCapabilities(): void {
   for (const cap of pixelCapabilities) {
     executionEngine.registerCapability('PIXEL', cap)
   }
+  for (const cap of finishCapabilities) {
+    executionEngine.registerCapability('FINISH', cap)
+  }
 }
 
 export { maestroCapabilities } from './maestro'
 export { sentinelCapabilities } from './sentinel'
 export { architectonCapabilities } from './architecton'
 export { pixelCapabilities } from './pixel'
+export { finishCapabilities } from './finish'

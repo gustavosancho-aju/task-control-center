@@ -1,6 +1,9 @@
 import { createClaudeMessage } from '@/lib/ai/claude-client'
 import type { AgentCapability, ExecutionContext, ExecutionResult } from '../execution-engine'
 import type { Task } from '@prisma/client'
+import prisma from '@/lib/db'
+import * as fs from 'fs'
+import * as path from 'path'
 
 const SYSTEM_PROMPT = `Você é o SENTINEL, guardião da qualidade do sistema Synkra AIOS.
 Sua especialidade é code review, testes, segurança e garantia de qualidade.
@@ -155,7 +158,86 @@ Para cada vulnerabilidade encontrada:
   },
 }
 
+export const reviewLandingPage: AgentCapability = {
+  name: 'reviewLandingPage',
+  description: 'Revisa landing page gerada: SEO, acessibilidade, performance e segurança',
+  async execute(task: Task, ctx: ExecutionContext): Promise<ExecutionResult> {
+    await ctx.log('INFO', 'Iniciando revisão de landing page')
+    await ctx.updateProgress(10)
+
+    try {
+      // Buscar arquivos gerados pelo PIXEL na mesma orquestração
+      let html = '', css = '', js = ''
+
+      if (task.orchestrationId) {
+        const pixelExecution = await prisma.agentExecution.findFirst({
+          where: {
+            task: { orchestrationId: task.orchestrationId },
+            agent: { role: 'PIXEL' },
+            status: 'COMPLETED',
+          },
+          orderBy: { completedAt: 'desc' },
+          select: { result: true, taskId: true },
+        })
+
+        if (pixelExecution?.taskId) {
+          const dir = path.join(process.cwd(), 'public', 'generated', pixelExecution.taskId)
+          if (fs.existsSync(dir)) {
+            html = fs.readFileSync(path.join(dir, 'index.html'), 'utf-8').slice(0, 8000)
+            css = fs.readFileSync(path.join(dir, 'style.css'), 'utf-8').slice(0, 6000)
+            js = fs.readFileSync(path.join(dir, 'script.js'), 'utf-8').slice(0, 4000)
+          }
+        }
+      }
+
+      if (!html) {
+        await ctx.log('WARNING', 'Arquivos da landing page não encontrados, revisão baseada na descrição')
+      }
+
+      await ctx.updateProgress(30)
+
+      const codeContext = html
+        ? `\n\nARQUIVOS GERADOS (trechos):\n\n--- HTML (primeiros 8KB) ---\n${html}\n\n--- CSS (primeiros 6KB) ---\n${css}\n\n--- JS (primeiros 4KB) ---\n${js}`
+        : ''
+
+      const result = await createClaudeMessage(
+        `Revise esta landing page com rigor profissional:
+
+**Tarefa:** ${task.title}
+**Descrição:** ${task.description || 'Landing page'}${codeContext}
+
+Avalie cada categoria com nota 1-10 e comentários específicos:
+
+1. **SEO (1-10):** Meta tags, H1-H3 hierarchy, alt texts, structured data, semantic HTML
+2. **Acessibilidade (1-10):** WCAG 2.1 AA, ARIA attributes, contraste, keyboard nav, focus visible
+3. **Performance (1-10):** Tamanho dos arquivos, lazy loading, CSS/JS otimizados, render blocking
+4. **Segurança (1-10):** XSS, form validation, external links rel="noopener", CSP headers
+5. **Conversão (1-10):** CTA positioning, above-the-fold, urgência, social proof, WhatsApp visível
+6. **Mobile (1-10):** Responsividade, touch targets (48px mínimo), viewport, font sizes legíveis
+7. **Design (1-10):** Consistência visual, hierarquia, espaçamento, tipografia, cores
+
+Para cada problema encontrado:
+- Severidade: CRITICAL / HIGH / MEDIUM / LOW
+- Linha/elemento afetado
+- Recomendação de correção
+
+Finalize com SCORE TOTAL (média) e veredicto: APPROVED / NEEDS_REVISION / REJECTED.`,
+        SYSTEM_PROMPT
+      )
+
+      await ctx.log('INFO', 'Revisão de landing page concluída')
+      await ctx.updateProgress(90)
+      return { success: true, result, artifacts: ['landing-page-review.md'] }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
+      await ctx.log('ERROR', `Falha na revisão: ${msg}`)
+      return { success: false, error: msg }
+    }
+  },
+}
+
 export const sentinelCapabilities: AgentCapability[] = [
+  reviewLandingPage,
   reviewCode,
   runTests,
   checkQuality,

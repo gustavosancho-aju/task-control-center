@@ -6,6 +6,7 @@ const agentIcons: Record<AgentRole, string> = {
   SENTINEL: "🛡️",
   ARCHITECTON: "🏗️",
   PIXEL: "🎨",
+  FINISH: "🚀",
 }
 
 interface AgentBadgeProps {

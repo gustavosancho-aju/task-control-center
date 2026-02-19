@@ -30,6 +30,12 @@ async function seed() {
       description: 'Designer de interfaces. Cria layouts e componentes visuais.',
       skills: ['UI/UX', 'design system', 'CSS', 'componentes', 'responsividade'],
     },
+    {
+      name: 'Finish',
+      role: 'FINISH' as const,
+      description: 'Especialista em deploy e entrega. Consolida artefatos gerados e publica no Vercel.',
+      skills: ['deploy', 'vercel', 'hosting', 'entrega', 'publicacao'],
+    },
   ]
 
   for (const agent of agents) {
