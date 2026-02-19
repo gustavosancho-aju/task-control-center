@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plano Estratégico Digital — Dra. Luiza × SUITS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:ital,wght@0,200;0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a96e;
+    --gold-light: #e2c99a;
+    --rose: #d4a5a5;
+    --rose-deep: #b87878;
+    --dark: #0a0a0a;
+    --dark-2: #111111;
+    --dark-3: #181818;
+    --dark-4: #222222;
+    --surface: #1a1a1a;
+    --border: rgba(201,169,110,0.15);
+    --text: #e8e0d6;
+    --text-muted: rgba(232,224,214,0.45);
+    --text-dim: rgba(232,224,214,0.25);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; font-size: 16px; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.35;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 3rem;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    transition: all 0.4s ease;
+  }
+
+  .nav-logo {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes lineGrow {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 0.6; }
+    100% { transform: scale(1.4); opacity: 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(35px);
+    transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+  .reveal-delay-5 { transition-delay: 0.5s; }
+
+  /* ─── SECTION BASE ─── */
+  section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 7rem 0 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 4rem;
+    width: 100%;
+  }
+
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+
+  h2 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .section-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold) 0%, transparent 100%);
+    opacity: 0.2;
+    margin: 0;
+  }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    background: var(--dark);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 50%, rgba(201,169,110,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 60%, rgba(212,165,165,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 30% 40% at 50% 90%, rgba(201,169,110,0.03) 0%, transparent 60%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,169,110,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,169,110,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 100%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 0 4rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .hero-agency {
+    font-size: 0.65rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeIn 1s ease 0.3s forwards;
+  }
+
+  .hero-agency span {
+    color: var(--text-muted);
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s cubic-bezier(0.16,1,0.3,1) 0.5s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1s cubic-bezier(0.16,1,0.3,1) 0.65s forwards;
+  }
+
+  .hero-title-accent {
+    display: block;
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .hero-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    font-weight: 300;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    margin-top: 1rem;
+    margin-bottom: 3.5rem;
+    opacity: 0;
+    animation: fadeUp 1s cubic-bezier(0.16,1,0.3,1) 0.8s forwards;
+  }
+
+  .hero-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--gold-light);
+    opacity: 0;
+    animation: fadeUp 1s cubic-bezier(0.16,1,0.3,1) 0.95s forwards;
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .hero-tagline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 70%;
+    background: var(--rose);
+    border-radius: 2px;
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeIn 1s ease 1.5s forwards;
+  }
+
+  .hero-scroll span {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: float 2s ease-in-out infinite;
+  }
+
+  /* ─── DECORATIVE CIRCLES ─── */
+  .hero-deco {
+    position: absolute;
+    right: 8%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 350px;
+    height: 350px;
+    opacity: 0;
+    animation: fadeIn 1.5s ease 1s forwards;
+  }
+
+  .hero-deco-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(201,169,110,0.15);
+  }
+
+  .hero-deco-ring:nth-child(1) { inset: 0; }
+  .hero-deco-ring:nth-child(2) { inset: 30px; border-color: rgba(212,165,165,0.1); }
+  .hero-deco-ring:nth-child(3) { inset: 70px; border-color: rgba(201,169,110,0.08); }
+
+  .hero-deco-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    top: 50%;
+    left: -4px;
+    transform: translateY(-50%);
+    box-shadow: 0 0 20px rgba(201,169,110,0.6);
+  }
+
+  /* ─── OBJETIVOS ─── */
+  #objetivos {
+    background: var(--dark-2);
+  }
+
+  .objetivos-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1.5px;
+    margin-top: 3.5rem;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .objetivo-card {
+    background: var(--dark-2);
+    padding: 2.5rem 2rem;
+    position: relative;
+    transition: background 0.4s ease;
+    cursor: default;
+  }
+
+  .objetivo-card:hover { background: var(--dark-3); }
+
+  .objetivo-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 1.2rem;
+    transition: color 0.4s;
+  }
+
+  .objetivo-card:hover .objetivo-num { color: rgba(201,169,110,0.2); }
+
+  .objetivo-icon {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .objetivo-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: var(--gold);
+    fill: none;
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .objetivo-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .objetivo-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .objetivo-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--rose));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .objetivo-card:hover::after { transform: scaleX(1); }
+
+  /* ─── FUNIL ─── */
+  #funil {
+    background: var(--dark);
+  }
+
+  .funil-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 5rem;
+    align-items: center;
+    margin-top: 3rem;
+  }
+
+  .funil-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .funil-stage {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+  }
+
+  .funil-trapezoid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.2rem 2rem;
+    position: relative;
+    transition: filter 0.3s ease;
+  }
+
+  .funil-trapezoid:hover { filter: brightness(1.3); }
+
+  .funil-stage:nth-child(1) .funil-trapezoid {
+    background: linear-gradient(135deg, rgba(201,169,110,0.2), rgba(201,169,110,0.08));
+    clip-path: polygon(5% 0%, 95% 0%, 85% 100%, 15% 100%);
+    padding: 1.5rem 3rem;
+    border-top: 1px solid rgba(201,169,110,0.3);
+  }
+
+  .funil-stage:nth-child(2) .funil-trapezoid {
+    background: linear-gradient(135deg, rgba(212,165,165,0.2), rgba(212,165,165,0.08));
+    clip-path: polygon(15% 0%, 85% 0%, 75% 100%, 25% 100%);
+    border-top: 1px solid rgba(212,165,165,0.2);
+  }
+
+  .funil-stage:nth-child(3) .funil-trapezoid {
+    background: linear-gradient(135deg, rgba(184,120,120,0.2), rgba(184,120,120,0.08));
+    clip-path: polygon(25% 0%, 75% 0%, 65% 100%, 35% 100%);
+    border-top: 1px solid rgba(184,120,120,0.2);
+  }
+
+  .funil-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .funil-stage:nth-child(1) .funil-label { color: var(--gold); }
+  .funil-stage:nth-child(2) .funil-label { color: var(--rose); }
+  .funil-stage:nth-child(3) .funil-label { color: var(--rose-deep); }
+
+  .funil-sublabel {
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+  }
+
+  .funil-text-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .funil-detail {
+    border-left: 2px solid var(--border);
+    padding-left: 1.5rem;
+    transition: border-color 0.3s;
+  }
+
+  .funil-detail:hover { border-color: rgba(201,169,110,0.4); }
+
+  .funil-detail-stage {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .funil-detail:nth-child(2) .funil-detail-stage { color: var(--rose); }
+  .funil-detail:nth-child(3) .funil-detail-stage { color: var(--rose-deep); }
+
+  .funil-detail h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-bottom: 0.75rem;
+  }
+
+  .funil-detail ul {
+    list-style: none;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .funil-detail ul li::before {
+    content: '—';
+    color: var(--gold);
+    margin-right: 0.5rem;
+    opacity: 0.4;
+  }
+
+  .funil-objetivo {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+
+  .funil-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 20px;
+  }
+
+  /* ─── PREÇO ─── */
+  #preco {
+    background: var(--dark-2);
+  }
+
+  .preco-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+    margin-top: 3.5rem;
+  }
+
+  .preco-problem {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2.5rem;
+    position: relative;
+  }
+
+  .preco-problem::before {
+    content: '"';
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 6rem;
+    line-height: 1;
+    color: var(--border);
+    position: absolute;
+    top: 0.5rem;
+    left: 1.5rem;
+  }
+
+  .preco-problem blockquote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--text-muted);
+    padding-top: 2rem;
+  }
+
+  .preco-problem figcaption {
+    margin-top: 1rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rose);
+  }
+
+  .preco-solution {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .preco-solution p.lead {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .preco-pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 0.5rem 0;
+  }
+
+  .preco-pillar {
+    padding: 1.5rem 1rem;
+    border: 1px solid var(--border);
+    text-align: center;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .preco-pillar:hover {
+    border-color: rgba(201,169,110,0.35);
+    background: rgba(201,169,110,0.04);
+  }
+
+  .preco-pillar-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .preco-pillar-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--gold-light);
+  }
+
+  .preco-conclusion {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--text);
+    padding-left: 1.2rem;
+    border-left: 2px solid var(--rose);
+    line-height: 1.6;
+  }
+
+  /* ─── INVESTIMENTO ─── */
+  #investimento {
+    background: var(--dark);
+  }
+
+  .investimento-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 6rem;
+    align-items: center;
+    margin-top: 3.5rem;
+  }
+
+  .inv-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .inv-bar-item {}
+
+  .inv-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.7rem;
+  }
+
+  .inv-bar-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .inv-bar-pct {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  .inv-bar-track {
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .inv-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    width: 0;
+    transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  .inv-bar-item:nth-child(1) .inv-bar-pct { color: var(--gold); }
+  .inv-bar-item:nth-child(1) .inv-bar-fill { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+
+  .inv-bar-item:nth-child(2) .inv-bar-pct { color: var(--rose); }
+  .inv-bar-item:nth-child(2) .inv-bar-fill { background: linear-gradient(90deg, var(--rose), var(--rose-deep)); }
+
+  .inv-bar-item:nth-child(3) .inv-bar-pct { color: rgba(201,169,110,0.6); }
+  .inv-bar-item:nth-child(3) .inv-bar-fill { background: linear-gradient(90deg, rgba(201,169,110,0.6), rgba(201,169,110,0.3)); }
+
+  .inv-note {
+    margin-top: 2.5rem;
+    padding: 1.2rem 1.5rem;
+    border: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .inv-note strong { color: var(--gold); font-weight: 400; }
+
+  .inv-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .inv-card {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: border-color 0.3s;
+  }
+
+  .inv-card:hover { border-color: rgba(201,169,110,0.3); }
+
+  .inv-card-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .inv-card-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .inv-card-sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+  }
+
+  /* ─── COPYS ─── */
+  #copys {
+    background: var(--dark-2);
+  }
+
+  .copys-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-top: 3.5rem;
+  }
+
+  .copys-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .copys-col-header {
+    padding: 1rem 1.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .copys-col.evitar .copys-col-header {
+    border-left: 3px solid rgba(184,120,120,0.5);
+    color: var(--rose-deep);
+  }
+
+  .copys-col.usar .copys-col-header {
+    border-left: 3px solid rgba(201,169,110,0.5);
+    color: var(--gold);
+  }
+
+  .copy-item {
+    padding: 1.2rem 1.5rem;
+    border: 1px solid var(--border);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-style: italic;
+    line-height: 1.5;
+    transition: background 0.3s;
+  }
+
+  .copys-col.evitar .copy-item {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    text-decoration-color: rgba(184,120,120,0.4);
+  }
+
+  .copys-col.evitar .copy-item:hover { background: rgba(184,120,120,0.04); }
+
+  .copys-col.usar .copy-item {
+    color: var(--text);
+  }
+
+  .copys-col.usar .copy-item:hover { background: rgba(201,169,110,0.04); }
+
+  .copys-tom {
+    margin-top: 3rem;
+    padding: 2rem 2.5rem;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .copys-tom-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .copys-tom-pills {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .tom-pill {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--gold-light);
+    padding: 0.3rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 30px;
+  }
+
+  /* ─── WHATSAPP ─── */
+  #whatsapp {
+    background: var(--dark);
+  }
+
+  .wa-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: start;
+    margin-top: 3.5rem;
+  }
+
+  .wa-rules {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .wa-rule {
+    background: var(--dark);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: background 0.3s;
+  }
+
+  .wa-rule:hover { background: var(--dark-3); }
+
+  .wa-rule-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--gold);
+    opacity: 0.4;
+    min-width: 2rem;
+    text-align: center;
+  }
+
+  .wa-rule-text {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .wa-modelo {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .wa-modelo-title {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .wa-steps {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .wa-steps::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    bottom: 12px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    opacity: 0.2;
+  }
+
+  .wa-step {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.2rem 0;
+  }
+
+  .wa-step-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,169,110,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.6rem;
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  .wa-step-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  .wa-message {
+    margin-top: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    border-radius: 4px 16px 16px 16px;
+    position: relative;
+  }
+
+  .wa-message::before {
+    content: 'mensagem automática';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    transform: translateY(-100%);
+    padding-bottom: 0.4rem;
+  }
+
+  .wa-message p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-style: italic;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ─── REMARKETING ─── */
+  #remarketing {
+    background: var(--dark-2);
+    min-height: 60vh;
+  }
+
+  .remarketing-inner {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .remarketing-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.3;
+    color: var(--text);
+    margin: 2rem 0 3rem;
+    padding: 0 2rem;
+  }
+
+  .remarketing-pillars {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .remarketing-pillar {
+    padding: 0.8rem 2rem;
+    border: 1px solid var(--border);
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    transition: border-color 0.3s, color 0.3s;
+  }
+
+  .remarketing-pillar:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .remarketing-timer {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+    padding: 0.5rem 1.2rem;
+    border: 1px solid rgba(201,169,110,0.2);
+    border-radius: 30px;
+  }
+
+  .remarketing-timer span {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .timer-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    position: relative;
+  }
+
+  .timer-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid var(--gold);
+    animation: pulse-ring 1.5s ease-out infinite;
+  }
+
+  /* ─── CRONOGRAMA ─── */
+  #cronograma {
+    background: var(--dark);
+  }
+
+  .cronograma-timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: 3.5rem;
+    position: relative;
+  }
+
+  .cronograma-timeline::before {
+    content: '';
+    position: absolute;
+    top: 2.5rem;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.2;
+  }
+
+  .semana-card {
+    padding: 0 2rem 2rem;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+
+  .semana-card:last-child { border-right: none; }
+
+  .semana-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,169,110,0.4);
+    background: var(--dark);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+
+  .semana-card:hover .semana-dot {
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(201,169,110,0.3);
+  }
+
+  .semana-dot::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.6;
+  }
+
+  .semana-num {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .semana-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .semana-actions {
+    list-style: none;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 2;
+  }
+
+  .semana-actions li::before {
+    content: '→';
+    color: var(--gold);
+    margin-right: 0.5rem;
+    opacity: 0.5;
+  }
+
+  /* ─── META ─── */
+  #meta {
+    background: var(--dark-2);
+    text-align: center;
+  }
+
+  .meta-numbers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5px;
+    margin: 4rem 0;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .meta-num-item {
+    background: var(--dark-2);
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.3s;
+  }
+
+  .meta-num-item:hover { background: var(--dark-3); }
+
+  .meta-num-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 300;
+    line-height: 1;
+    color: var(--gold);
+  }
+
+  .meta-num-item:nth-child(3) .meta-num-value { color: var(--rose); }
+  .meta-num-item:nth-child(4) .meta-num-value { color: var(--gold-light); }
+
+  .meta-num-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-top: 0.3rem;
+  }
+
+  .meta-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* ─── DIFERENCIAIS ─── */
+  #diferenciais {
+    background: var(--dark);
+  }
+
+  .dif-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5px;
+    margin-top: 3.5rem;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .dif-card {
+    background: var(--dark);
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.2rem;
+    transition: background 0.4s;
+    cursor: default;
+  }
+
+  .dif-card:hover { background: var(--dark-3); }
+
+  .dif-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--gold);
+    opacity: 0.4;
+    font-style: italic;
+  }
+
+  .dif-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  .dif-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .dif-narrativa {
+    text-align: center;
+    margin-top: 3rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  /* ─── FOOTER / CTA ─── */
+  #cta {
+    background: var(--dark-2);
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 60% at 50% 50%, rgba(201,169,110,0.05) 0%, transparent 70%);
+  }
+
+  .cta-content {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+    padding: 0 2rem;
+  }
+
+  .cta-agency {
+    font-size: 0.7rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2.5rem;
+  }
+
+  .cta-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 300;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+  }
+
+  .cta-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .cta-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 3rem;
+  }
+
+  .cta-line {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    margin: 0 auto;
+    opacity: 0.4;
+  }
+
+  .cta-suits {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .suits-wordmark {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    opacity: 0.4;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .suits-tagline {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ─── PRINT ─── */
+  @media print {
+    nav { display: none; }
+    section { min-height: auto; page-break-inside: avoid; }
+    .hero-deco { display: none; }
+    * { animation: none !important; transition: none !important; }
+    .inv-bar-fill { width: var(--target-width) !important; }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 1024px) {
+    nav { padding: 1rem 2rem; }
+    .nav-links { display: none; }
+    .container { padding: 0 2rem; }
+    .hero-content { padding: 0 2rem; }
+    .hero-deco { display: none; }
+    .objetivos-grid { grid-template-columns: 1fr 1fr; }
+    .objetivo-card:last-child { grid-column: span 2; }
+    .funil-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .preco-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .investimento-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .copys-layout { grid-template-columns: 1fr; }
+    .wa-layout { grid-template-columns: 1fr; }
+    .cronograma-timeline { grid-template-columns: 1fr 1fr; }
+    .meta-numbers { grid-template-columns: 1fr 1fr; }
+    .dif-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 640px) {
+    .objetivos-grid { grid-template-columns: 1fr; }
+    .objetivo-card:last-child { grid-column: span 1; }
+    .cronograma-timeline { grid-template-columns: 1fr; }
+    .meta-numbers { grid-template-columns: 1fr 1fr; }
+    .dif-grid { grid-template-columns: 1fr 1fr; }
+    .preco-pillars { grid-template-columns: 1fr; }
+    section { padding: 6rem 0 4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">SUITS — Agência de Marketing</div>
+  <ul class="nav-links">
+    <li><a href="#objetivos">Objetivos</a></li>
+    <li><a href="#funil">Funil</a></li>
+    <li><a href="#investimento">Investimento</a></li>
+    <li><a href="#cronograma">Cronograma</a></li>
+    <li><a href="#meta">Metas</a></li>
+    <li><a href="#cta">Proposta</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-deco" aria-hidden="true">
+    <div class="hero-deco-ring"></div>
+    <div class="hero-deco-ring"></div>
+    <div class="hero-deco-ring"></div>
+    <div class="hero-deco-dot"></div>
+  </div>
+
+  <div class="hero-content">
+    <p class="hero-agency">SUITS <span>×</span> Dra. Luiza</p>
+    <p class="hero-eyebrow">Estratégia de Tráfego Pago</p>
+    <h1 class="hero-title">
+      Plano
+      <span class="hero-title-accent">Estratégico</span>
+      Digital
+    </h1>
+    <p class="hero-subtitle">Dra. Luiza — Harmonização Facial &amp; Estética</p>
+    <p class="hero-tagline">Da autoridade ao agendamento.</p>
+  </div>
+
+  <div class="hero-scroll" aria-hidden="true">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- OBJETIVOS -->
+<section id="objetivos">
+  <div class="container">
+    <p class="section-label reveal">01 — Estratégia</p>
+    <h2 class="reveal reveal-delay-1">Objetivos <em>Estratégicos</em></h2>
+
+    <div class="objetivos-grid">
+
+      <div class="objetivo-card reveal reveal-delay-1">
+        <div class="objetivo-num">01</div>
+        <div class="objetivo-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+        <h3 class="objetivo-title">Gerar leads qualificados</h3>
+        <p class="objetivo-desc">Atrair o público certo, com real intenção de agendamento.</p>
+      </div>
+
+      <div class="objetivo-card reveal reveal-delay-2">
+        <div class="objetivo-num">02</div>
+        <div class="objetivo-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <h3 class="objetivo-title">Aumentar percepção de valor</h3>
+        <p class="objetivo-desc">Parar de competir por preço. Posicionar como referência premium.</p>
+      </div>
+
+      <div class="objetivo-card reveal reveal-delay-3">
+        <div class="objetivo-num">03</div>
+        <div class="objetivo-icon">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3 class="objetivo-title">Reduzir necessidade de descontos</h3>
+        <p class="objetivo-desc">Clientes que chegam convencidos não negociam preço.</p>
+      </div>
+
+      <div class="objetivo-card reveal reveal-delay-4">
+        <div class="objetivo-num">04</div>
+        <div class="objetivo-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3 class="objetivo-title">Criar autoridade e confiança</h3>
+        <p class="objetivo-desc">A cliente já confia antes mesmo de solicitar o orçamento.</p>
+      </div>
+
+      <div class="objetivo-card reveal reveal-delay-5">
+        <div class="objetivo-num">05</div>
+        <div class="objetivo-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <h3 class="objetivo-title">Construir agenda previsível</h3>
+        <p class="objetivo-desc">Fluxo constante de agendamentos sem depender de indicações.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- FUNIL -->
+<section id="funil">
+  <div class="container">
+    <p class="section-label reveal">02 — Estrutura</p>
+    <h2 class="reveal reveal-delay-1">Funil de <em>Tráfego Pago</em></h2>
+
+    <div class="funil-layout">
+      <div class="funil-visual reveal reveal-delay-2">
+
+        <div class="funil-stage">
+          <div class="funil-trapezoid">
+            <div style="text-align:center">
+              <div class="funil-label">Topo de Funil</div>
+              <div class="funil-sublabel">Atração &amp; Posicionamento</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="funil-stage">
+          <div class="funil-trapezoid">
+            <div style="text-align:center">
+              <div class="funil-label">Meio de Funil</div>
+              <div class="funil-sublabel">Desejo &amp; Confiança</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="funil-stage">
+          <div class="funil-trapezoid">
+            <div style="text-align:center">
+              <div class="funil-label">Fundo de Funil</div>
+              <div class="funil-sublabel">Conversão</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="funil-text-stack">
+
+        <div class="funil-detail reveal reveal-delay-2">
+          <div class="funil-detail-stage">Topo — Atração</div>
+          <h3>Gerar reconhecimento</h3>
+          <ul>
+            <li>Mulheres 28–55, interesses em estética e harmonização</li>
+            <li>Reels educativos, bastidores do consultório</li>
+            <li>Antes e depois (dentro das normas)</li>
+            <li>Posicionamento: Segurança · Naturalidade · Técnica</li>
+          </ul>
+          <div class="funil-objetivo">
+            <span class="funil-tag">Visualização</span>
+            <span class="funil-tag">Engajamento</span>
+            <span class="funil-tag">Alcance</span>
+          </div>
+        </div>
+
+        <div class="funil-detail reveal reveal-delay-3">
+          <div class="funil-detail-stage">Meio — Desejo</div>
+          <h3>Transformar interesse em intenção</h3>
+          <ul>
+            <li>Assistiram 50%+ dos vídeos · Engajaram no Instagram</li>
+            <li>Depoimentos reais e prova social</li>
+            <li>"Para quem esse procedimento é ideal?"</li>
+          </ul>
+          <div class="funil-objetivo">
+            <span class="funil-tag">WhatsApp</span>
+            <span class="funil-tag">Mensagens</span>
+            <span class="funil-tag">Conversões</span>
+          </div>
+        </div>
+
+        <div class="funil-detail reveal reveal-delay-4">
+          <div class="funil-detail-stage">Fundo — Conversão</div>
+          <h3>Gerar o agendamento</h3>
+          <ul>
+            <li>Quem abriu conversa mas não respondeu</li>
+            <li>"Agenda de fevereiro quase finalizada"</li>
+            <li>"Avaliação personalizada + plano exclusivo"</li>
+            <li style="color: rgba(184,120,120,0.6)">SEM promoção barata ou desconto agressivo</li>
+          </ul>
+          <div class="funil-objetivo">
+            <span class="funil-tag">Escassez</span>
+            <span class="funil-tag">Urgência</span>
+            <span class="funil-tag">Exclusividade</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- PREÇO -->
+<section id="preco">
+  <div class="container">
+    <p class="section-label reveal">03 — Posicionamento</p>
+    <h2 class="reveal reveal-delay-1">Estratégia de <em>Preço</em></h2>
+
+    <div class="preco-layout">
+
+      <figure class="preco-problem reveal reveal-delay-2">
+        <blockquote>Devido ao alto custo, me sinto insegura e quase sempre dou desconto.</blockquote>
+        <figcaption>— O problema que o tráfego resolve</figcaption>
+      </figure>
+
+      <div class="preco-solution reveal reveal-delay-3">
+        <p class="lead">O tráfego cria as condições psicológicas necessárias para que o preço deixe de ser o centro da negociação.</p>
+
+        <div class="preco-pillars">
+          <div class="preco-pillar">
+            <div class="preco-pillar-icon">◆</div>
+            <div class="preco-pillar-name">Autoridade</div>
+          </div>
+          <div class="preco-pillar">
+            <div class="preco-pillar-icon">◆</div>
+            <div class="preco-pillar-name">Desejo</div>
+          </div>
+          <div class="preco-pillar">
+            <div class="preco-pillar-icon">◆</div>
+            <div class="preco-pillar-name">Percepção Premium</div>
+          </div>
+        </div>
+
+        <p class="preco-conclusion">Quando a cliente chega no WhatsApp já convencida, o preço deixa de ser o foco principal.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- INVESTIMENTO -->
+<section id="investimento">
+  <div class="container">
+    <p class="section-label reveal">04 — Alocação</p>
+    <h2 class="reveal reveal-delay-1">Estratégia de <em>Investimento</em></h2>
+
+    <div class="investimento-layout">
+
+      <div class="reveal reveal-delay-2">
+        <div class="inv-bars">
+
+          <div class="inv-bar-item">
+            <div class="inv-bar-header">
+              <span class="inv-bar-label">Topo de Funil — Atração</span>
+              <span class="inv-bar-pct" data-count="40">0%</span>
+            </div>
+            <div class="inv-bar-track">
+              <div class="inv-bar-fill" style="--target-width: 40%" data-width="40"></div>
+            </div>
+          </div>
+
+          <div class="inv-bar-item">
+            <div class="inv-bar-header">
+              <span class="inv-bar-label">Meio de Funil — Desejo</span>
+              <span class="inv-bar-pct" data-count="35">0%</span>
+            </div>
+            <div class="inv-bar-track">
+              <div class="inv-bar-fill" style="--target-width: 35%" data-width="35"></div>
+            </div>
+          </div>
+
+          <div class="inv-bar-item">
+            <div class="inv-bar-header">
+              <span class="inv-bar-label">Fundo de Funil — Conversão</span>
+              <span class="inv-bar-pct" data-count="25">0%</span>
+            </div>
+            <div class="inv-bar-track">
+              <div class="inv-bar-fill" style="--target-width: 25%" data-width="25"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="inv-note">
+          <strong>Após 30 dias:</strong> redirecionar orçamento para o que mais converte. A estratégia é dinâmica e evolui com os dados reais das campanhas.
+        </div>
+      </div>
+
+      <div class="inv-right reveal reveal-delay-3">
+        <div class="inv-card">
+          <div class="inv-card-label">Investimento mensal sugerido</div>
+          <div class="inv-card-value">R$ 2.000</div>
+          <div class="inv-card-sub">Distribuídos entre topo, meio e fundo de funil</div>
+        </div>
+        <div class="inv-card">
+          <div class="inv-card-label">Ticket médio por procedimento</div>
+          <div class="inv-card-value">R$ 600</div>
+          <div class="inv-card-sub">Base de cálculo para ROI esperado</div>
+        </div>
+        <div class="inv-card">
+          <div class="inv-card-label">Retorno potencial / mês</div>
+          <div class="inv-card-value">R$ 6–9K</div>
+          <div class="inv-card-sub">Com meta de 10–15 procedimentos pagos</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- COPYS -->
+<section id="copys">
+  <div class="container">
+    <p class="section-label reveal">05 — Comunicação</p>
+    <h2 class="reveal reveal-delay-1">Estrutura de <em>Copys</em></h2>
+
+    <div class="copys-layout">
+
+      <div class="copys-col evitar reveal reveal-delay-2">
+        <div class="copys-col-header">Evitar</div>
+        <div class="copy-item">"Promoção imperdível!"</div>
+        <div class="copy-item">"Última chance de ficar linda!"</div>
+        <div class="copy-item">Linguagem apelativa e popular</div>
+        <div class="copy-item">"Desconto agressivo"</div>
+        <div class="copy-item">"Promoção barata"</div>
+      </div>
+
+      <div class="copys-col usar reveal reveal-delay-3">
+        <div class="copys-col-header">Usar</div>
+        <div class="copy-item">"Resultados naturais"</div>
+        <div class="copy-item">"Segurança clínica"</div>
+        <div class="copy-item">"Planejamento individualizado"</div>
+        <div class="copy-item">"Avaliação personalizada"</div>
+        <div class="copy-item">"Procedimento exclusivo para você"</div>
+      </div>
+
+    </div>
+
+    <div class="copys-tom reveal reveal-delay-4">
+      <span class="copys-tom-label">Tom de comunicação</span>
+      <div class="copys-tom-pills">
+        <span class="tom-pill">Elegante</span>
+        <span class="tom-pill">Técnico</span>
+        <span class="tom-pill">Seguro</span>
+        <span class="tom-pill">Natural</span>
+        <span class="tom-pill">Sem apelo popular</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- WHATSAPP -->
+<section id="whatsapp">
+  <div class="container">
+    <p class="section-label reveal">06 — Conversão</p>
+    <h2 class="reveal reveal-delay-1">Estratégia de <em>WhatsApp</em></h2>
+
+    <div class="wa-layout">
+
+      <div class="reveal reveal-delay-2">
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:1.5rem; line-height:1.7;">
+          O tráfego leva para o WhatsApp. Mas a <strong style="color:var(--text); font-weight:400;">conversão depende do atendimento</strong>. Quatro regras fundamentais:
+        </p>
+        <div class="wa-rules">
+          <div class="wa-rule">
+            <span class="wa-rule-num">1</span>
+            <span class="wa-rule-text">Resposta rápida — o lead esfria em minutos</span>
+          </div>
+          <div class="wa-rule">
+            <span class="wa-rule-num">2</span>
+            <span class="wa-rule-text">Comunicação segura e profissional</span>
+          </div>
+          <div class="wa-rule">
+            <span class="wa-rule-num">3</span>
+            <span class="wa-rule-text">Não parecer desespero ou urgência forçada</span>
+          </div>
+          <div class="wa-rule">
+            <span class="wa-rule-num">4</span>
+            <span class="wa-rule-text">Não baixar preço imediatamente</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wa-modelo reveal reveal-delay-3">
+        <div class="wa-modelo-title">Modelo estratégico de atendimento</div>
+
+        <div class="wa-steps">
+          <div class="wa-step">
+            <div class="wa-step-dot">1</div>
+            <div class="wa-step-text">Perguntar qual o objetivo da cliente</div>
+          </div>
+          <div class="wa-step">
+            <div class="wa-step-dot">2</div>
+            <div class="wa-step-text">Perguntar o que incomoda atualmente</div>
+          </div>
+          <div class="wa-step">
+            <div class="wa-step-dot">3</div>
+            <div class="wa-step-text">Mostrar autoridade e capacitação técnica</div>
+          </div>
+          <div class="wa-step">
+            <div class="wa-step-dot">4</div>
+            <div class="wa-step-text">Só depois apresentar o valor</div>
+          </div>
+        </div>
+
+        <div class="wa-message">
+          <p>"Olá, que bom ter você aqui!<br>Você está buscando qual tipo de procedimento?"</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- REMARKETING -->
+<section id="remarketing">
+  <div class="container">
+    <div class="remarketing-inner">
+      <p class="section-label reveal" style="justify-content:center">07 — Reengajamento</p>
+      <h2 class="reveal reveal-delay-1" style="text-align:center">Remarketing <em>Estratégico</em></h2>
+
+      <div class="reveal reveal-delay-2">
+        <div class="remarketing-timer" style="margin:2rem auto 0">
+          <div class="timer-dot"></div>
+          <span>Ativado após 7 dias sem conversão</span>
+        </div>
+
+        <p class="remarketing-quote">"Você ainda está pensando em fazer seu procedimento?"</p>
+      </div>
+
+      <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:2rem" class="reveal reveal-delay-3">
+        Campanha específica de reengajamento com reforço dos pilares que constroem confiança:
+      </p>
+
+      <div class="remarketing-pillars reveal reveal-delay-4">
+        <div class="remarketing-pillar">Segurança</div>
+        <div class="remarketing-pillar">Naturalidade</div>
+        <div class="remarketing-pillar">Prova Social</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- CRONOGRAMA -->
+<section id="cronograma">
+  <div class="container">
+    <p class="section-label reveal">08 — Execução</p>
+    <h2 class="reveal reveal-delay-1">Cronograma de <em>30 Dias</em></h2>
+
+    <div class="cronograma-timeline">
+
+      <div class="semana-card reveal reveal-delay-1">
+        <div class="semana-dot"></div>
+        <div class="semana-num">Semana 01</div>
+        <h3 class="semana-title">Lançamento Topo + Meio</h3>
+        <ul class="semana-actions">
+          <li>Configurar campanhas de alcance</li>
+          <li>Ativar reels educativos</li>
+          <li>Campanha de engajamento</li>
+        </ul>
+      </div>
+
+      <div class="semana-card reveal reveal-delay-2">
+        <div class="semana-dot"></div>
+        <div class="semana-num">Semana 02</div>
+        <h3 class="semana-title">Criar Remarketing</h3>
+        <ul class="semana-actions">
+          <li>Montar público de retargeting</li>
+          <li>Ativar campanha de reengajamento</li>
+          <li>Acompanhar métricas iniciais</li>
+        </ul>
+      </div>
+
+      <div class="semana-card reveal reveal-delay-3">
+        <div class="semana-dot"></div>
+        <div class="semana-num">Semana 03</div>
+        <h3 class="semana-title">Otimização de Públicos</h3>
+        <ul class="semana-actions">
+          <li>Ajustar segmentações</li>
+          <li>Pausar anúncios com baixo desempenho</li>
+          <li>Testar novos criativos</li>
+        </ul>
+      </div>
+
+      <div class="semana-card reveal reveal-delay-4">
+        <div class="semana-dot"></div>
+        <div class="semana-num">Semana 04</div>
+        <h3 class="semana-title">Escalar Melhor Campanha</h3>
+        <ul class="semana-actions">
+          <li>Aumentar orçamento no vencedor</li>
+          <li>Relatório completo de resultados</li>
+          <li>Planejar mês seguinte</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- META -->
+<section id="meta">
+  <div class="container">
+    <p class="section-label reveal" style="justify-content:center">09 — Projeção</p>
+    <h2 class="reveal reveal-delay-1" style="text-align:center">Meta <em>Realista</em></h2>
+
+    <div class="meta-numbers reveal reveal-delay-2">
+      <div class="meta-num-item">
+        <div class="meta-num-value" data-count="2000" data-prefix="R$" data-suffix="">R$0</div>
+        <div class="meta-sub">por mês</div>
+        <div class="meta-num-label">Investimento em mídia</div>
+      </div>
+      <div class="meta-num-item">
+        <div class="meta-num-value" data-count="600" data-prefix="R$" data-suffix="">R$0</div>
+        <div class="meta-sub">por procedimento</div>
+        <div class="meta-num-label">Ticket médio</div>
+      </div>
+      <div class="meta-num-item">
+        <div class="meta-num-value" data-count="10" data-prefix="" data-suffix="–15">0</div>
+        <div class="meta-sub">procedimentos pagos/mês</div>
+        <div class="meta-num-label">Meta mínima saudável</div>
+      </div>
+      <div class="meta-num-item">
+        <div class="meta-num-value" data-count="6" data-prefix="R$" data-suffix="–9K">R$0</div>
+        <div class="meta-sub">potencial mensal</div>
+        <div class="meta-num-label">Retorno em receita</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- DIFERENCIAIS -->
+<section id="diferenciais">
+  <div class="container">
+    <p class="section-label reveal">10 — Narrativa</p>
+    <h2 class="reveal reveal-delay-1">Diferenciais da <em>Dra. Luiza</em></h2>
+    <p class="reveal reveal-delay-2" style="color:var(--text-muted); font-size:0.82rem; max-width:500px; margin-top:0.5rem; margin-bottom:0">Isso será o centro de toda a narrativa de posicionamento.</p>
+
+    <div class="dif-grid">
+
+      <div class="dif-card reveal reveal-delay-1">
+        <div class="dif-mark">✦</div>
+        <h3 class="dif-title">Capacitada</h3>
+        <p class="dif-desc">Formação e especialização que geram credibilidade antes do primeiro contato.</p>
+      </div>
+
+      <div class="dif-card reveal reveal-delay-2">
+        <div class="dif-mark">✦</div>
+        <h3 class="dif-title">Técnica</h3>
+        <p class="dif-desc">Precisão e protocolo em cada procedimento. Não é intuição — é ciência.</p>
+      </div>
+
+      <div class="dif-card reveal reveal-delay-3">
+        <div class="dif-mark">✦</div>
+        <h3 class="dif-title">Segura</h3>
+        <p class="dif-desc">A cliente nunca se sente em risco. Segurança clínica é o maior argumento de venda.</p>
+      </div>
+
+      <div class="dif-card reveal reveal-delay-4">
+        <div class="dif-mark">✦</div>
+        <h3 class="dif-title">Resultado Natural</h3>
+        <p class="dif-desc">O maior medo do público é parecer "feito". Ela entrega o oposto disso.</p>
+      </div>
+
+    </div>
+
+    <p class="dif-narrativa reveal reveal-delay-5">"Isso será o centro da narrativa."</p>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-bg"></div>
+  <div class="cta-content">
+    <p class="cta-agency reveal">SUITS — Agência de Marketing</p>
+
+    <h2 class="cta-title reveal reveal-delay-1">
+      Pronta para transformar<br>
+      sua autoridade em<br>
+      <em>agenda cheia?</em>
+    </h2>
+
+    <p class="cta-sub reveal reveal-delay-2">
+      Este plano foi desenvolvido especificamente para o momento e os objetivos da Dra. Luiza. Cada etapa, cada campanha e cada copy foi pensada para posicionar, atrair e converter — sem abrir mão da elegância que define o trabalho dela.
+    </p>
+
+    <div class="cta-line reveal reveal-delay-3"></div>
+
+    <div class="cta-suits reveal reveal-delay-4">
+      <span class="suits-wordmark">SUITS</span>
+      <span class="suits-tagline">Agência de Marketing</span>
+    </div>
+  </div>
+</section>
+
+<script>
+  // ─── INTERSECTION OBSERVER ───
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+  reveals.forEach(el => io.observe(el));
+
+  // ─── ANIMATED BARS ───
+  const bars = document.querySelectorAll('.inv-bar-fill');
+  const counters = document.querySelectorAll('.inv-bar-pct[data-count]');
+
+  const barObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const bar = e.target;
+        const width = bar.dataset.width;
+        bar.style.width = width + '%';
+        barObs.unobserve(bar);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  bars.forEach(b => barObs.observe(b));
+
+  const counterObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const target = parseInt(el.dataset.count);
+        let current = 0;
+        const step = Math.ceil(target / 40);
+        const timer = setInterval(() => {
+          current = Math.min(current + step, target);
+          el.textContent = current + '%';
+          if (current >= target) clearInterval(timer);
+        }, 25);
+        counterObs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(c => counterObs.observe(c));
+
+  // ─── META NUMBER COUNTERS ───
+  const metaNumbers = document.querySelectorAll('.meta-num-value[data-count]');
+  const metaObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const target = parseInt(el.dataset.count);
+        const prefix = el.dataset.prefix || '';
+        const suffix = el.dataset.suffix || '';
+        let current = 0;
+        const duration = 1200;
+        const stepTime = 30;
+        const steps = duration / stepTime;
+        const increment = target / steps;
+
+        const timer = setInterval(() => {
+          current = Math.min(current + increment, target);
+          const val = Math.floor(current);
+          el.textContent = prefix + (val >= 1000 ? val.toLocaleString('pt-BR') : val) + (suffix ? suffix : '');
+          if (current >= target) clearInterval(timer);
+        }, stepTime);
+
+        metaObs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  metaNumbers.forEach(n => metaObs.observe(n));
+
+  // ─── NAV SCROLL EFFECT ───
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 80) {
+      nav.style.borderBottomColor = 'rgba(201,169,110,0.2)';
+    } else {
+      nav.style.borderBottomColor = 'rgba(201,169,110,0.15)';
+    }
+  }, { passive: true });
+</script>
+
+</body>
+</html>

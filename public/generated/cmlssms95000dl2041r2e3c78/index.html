@@ -1,0 +1,514 @@
+# LANDING PAGE - SISTEMA DE HISTÓRICO E LOGS DE LEADS
+
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema inteligente de rastreamento e auditoria de leads com registro automático de alterações, timestamps precisos e conformidade LGPD. Garanta controle total sobre suas mudanças de dados.">
+    <meta name="keywords" content="sistema de logs, auditoria de leads, histórico de alterações, compliance LGPD, rastreamento de dados, CRM auditável">
+    <meta name="author" content="Synkra AIOS">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Sistema de Histórico e Logs de Leads | Controle Total">
+    <meta property="og:description" content="Rastreie cada mudança nos seus leads com timestamp preciso e auditoria completa. Sistema profissional para compliance e gestão de dados.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://synkra.com.br/og-image-history.jpg">
+    
+    <title>Rastreamento e Auditoria de Leads | Sistema de Histórico Completo</title>
+    
+    <!-- Favicon SVG -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%232563eb' width='100' height='100' rx='20'/%3E%3Cpath fill='%23fff' d='M30 50h15v30H30zm25-20h15v50H55z'/%3E%3C/svg%3E">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <!-- HEADER / NAVIGATION -->
+    <header class="header" role="banner">
+        <nav class="nav" role="navigation">
+            <div class="nav__container">
+                <a href="#hero" class="nav__logo" aria-label="Página inicial">
+                    <svg class="nav__logo-icon" width="40" height="40" viewBox="0 0 40 40" fill="none">
+                        <rect width="40" height="40" rx="8" fill="#2563eb"/>
+                        <path d="M12 20h6v12h-6zm10-8h6v20h-6z" fill="#fff"/>
+                    </svg>
+                    <span class="nav__logo-text">Synkra History</span>
+                </a>
+                
+                <button class="nav__toggle" aria-label="Abrir menu" aria-expanded="false">
+                    <span class="nav__toggle-line"></span>
+                    <span class="nav__toggle-line"></span>
+                    <span class="nav__toggle-line"></span>
+                </button>
+                
+                <ul class="nav__menu">
+                    <li class="nav__item"><a href="#solucao" class="nav__link">Solução</a></li>
+                    <li class="nav__item"><a href="#funcionalidades" class="nav__link">Funcionalidades</a></li>
+                    <li class="nav__item"><a href="#especificacoes" class="nav__link">Especificações</a></li>
+                    <li class="nav__item"><a href="#beneficios" class="nav__link">Benefícios</a></li>
+                    <li class="nav__item"><a href="#depoimentos" class="nav__link">Depoimentos</a></li>
+                    <li class="nav__item"><a href="#casos-uso" class="nav__link">Casos de Uso</a></li>
+                    <li class="nav__item"><a href="#faq" class="nav__link">FAQ</a></li>
+                    <li class="nav__item"><a href="#contato" class="nav__link nav__link--cta">Demonstração Gratuita</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        
+        <!-- HERO SECTION -->
+        <section id="hero" class="hero">
+            <div class="hero__blob" data-animate="float"></div>
+            <div class="hero__container">
+                <div class="hero__content" data-animate="fade-up" data-delay="100">
+                    <h1 class="hero__title">
+                        Rastreie Cada Mudança.<br>
+                        <span class="hero__title-accent">Garanta Total Controle.</span>
+                    </h1>
+                    <p class="hero__subtitle">
+                        Sistema inteligente que registra automaticamente todas as alterações<br>
+                        nos seus leads com timestamp preciso e auditoria completa.
+                    </p>
+                    <div class="hero__cta">
+                        <a href="#contato" class="btn btn--primary btn--large">
+                            Solicitar Demonstração Gratuita
+                        </a>
+                        <a href="#solucao" class="btn btn--secondary btn--large">
+                            Ver Como Funciona
+                        </a>
+                    </div>
+                    <div class="hero__stats">
+                        <div class="hero__stat" data-animate="fade-up" data-delay="200">
+                            <span class="hero__stat-number">99.9%</span>
+                            <span class="hero__stat-label">Precisão nos Registros</span>
+                        </div>
+                        <div class="hero__stat" data-animate="fade-up" data-delay="300">
+                            <span class="hero__stat-number">&lt;100ms</span>
+                            <span class="hero__stat-label">Tempo de Resposta</span>
+                        </div>
+                        <div class="hero__stat" data-animate="fade-up" data-delay="400">
+                            <span class="hero__stat-number">7 anos</span>
+                            <span class="hero__stat-label">Retenção Conforme LGPD</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero__visual" data-animate="fade-left" data-delay="200">
+                    <div class="hero__mockup">
+                        <div class="mockup__screen">
+                            <div class="mockup__header">
+                                <span class="mockup__dot"></span>
+                                <span class="mockup__dot"></span>
+                                <span class="mockup__dot"></span>
+                            </div>
+                            <div class="mockup__content">
+                                <div class="mockup__timeline">
+                                    <div class="timeline__item" data-animate="slide-left" data-delay="500">
+                                        <div class="timeline__marker"></div>
+                                        <div class="timeline__content">
+                                            <span class="timeline__time">10:45:23</span>
+                                            <strong>Status alterado:</strong> Qualificado → Proposta Enviada
+                                        </div>
+                                    </div>
+                                    <div class="timeline__item" data-animate="slide-left" data-delay="600">
+                                        <div class="timeline__marker timeline__marker--success"></div>
+                                        <div class="timeline__content">
+                                            <span class="timeline__time">09:12:45</span>
+                                            <strong>Email enviado</strong> por João Silva
+                                        </div>
+                                    </div>
+                                    <div class="timeline__item" data-animate="slide-left" data-delay="700">
+                                        <div class="timeline__marker timeline__marker--info"></div>
+                                        <div class="timeline__content">
+                                            <span class="timeline__time">08:30:12</span>
+                                            <strong>Lead criado</strong> via formulário web
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero__scroll-indicator" data-animate="bounce">
+                <span class="hero__scroll-text">Role para explorar</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 5v14m0 0l7-7m-7 7l-7-7"/>
+                </svg>
+            </div>
+        </section>
+
+        <!-- PROBLEM STATEMENT -->
+        <section id="problema" class="section section--gray">
+            <div class="container">
+                <div class="section__header" data-animate="fade-up">
+                    <span class="section__label">O Problema</span>
+                    <h2 class="section__title">
+                        Perder Rastreabilidade é Perder <span class="text-accent">Controle</span>
+                    </h2>
+                </div>
+                <div class="problem-grid">
+                    <div class="problem-card" data-animate="fade-up" data-delay="100">
+                        <div class="problem-card__icon problem-card__icon--error">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                        </div>
+                        <h3 class="problem-card__title">Auditorias Manuais Demoradas</h3>
+                        <p class="problem-card__text">
+                            Equipes perdem <strong>15+ horas semanais</strong> reconstruindo manualmente o histórico de alterações para auditorias e compliance.
+                        </p>
+                    </div>
+                    <div class="problem-card" data-animate="fade-up" data-delay="200">
+                        <div class="problem-card__icon problem-card__icon--warning">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                                <line x1="12" y1="9" x2="12" y2="13"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                        </div>
+                        <h3 class="problem-card__title">Falta de Accountability</h3>
+                        <p class="problem-card__text">
+                            Impossível identificar <strong>quem alterou o quê e quando</strong>, gerando conflitos internos e perda de confiança nas decisões baseadas em dados.
+                        </p>
+                    </div>
+                    <div class="problem-card" data-animate="fade-up" data-delay="300">
+                        <div class="problem-card__icon problem-card__icon--critical">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0110 0v4"/>
+                            </svg>
+                        </div>
+                        <h3 class="problem-card__title">Riscos de Compliance</h3>
+                        <p class="problem-card__text">
+                            Não conformidade com <strong>LGPD/GDPR</strong> pode resultar em multas de até R$ 50 milhões e danos irreparáveis à reputação.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SOLUTION OVERVIEW -->
+        <section id="solucao" class="section">
+            <div class="container">
+                <div class="section__header" data-animate="fade-up">
+                    <span class="section__label">A Solução</span>
+                    <h2 class="section__title">
+                        Histórico Completo em <span class="text-accent">Tempo Real</span>
+                    </h2>
+                    <p class="section__description">
+                        Plataforma automatizada que transforma cada alteração em dados estruturados,<br>
+                        auditáveis e permanentemente rastreáveis.
+                    </p>
+                </div>
+                <div class="solution-grid">
+                    <div class="solution-card" data-animate="fade-up" data-delay="100">
+                        <div class="solution-card__visual">
+                            <svg class="solution-card__icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                        <div class="solution-card__content">
+                            <h3 class="solution-card__title">Registro Automático</h3>
+                            <p class="solution-card__text">
+                                Cada mudança de status, campo ou propriedade é capturada instantaneamente com <strong>timestamp Unix preciso</strong> (milissegundos) sem intervenção manual.
+                            </p>
+                            <ul class="solution-card__list">
+                                <li>Webhooks em tempo real</li>
+                                <li>Zero configuração necessária</li>
+                                <li>Imutabilidade garantida</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="solution-card" data-animate="fade-up" data-delay="200">
+                        <div class="solution-card__visual">
+                            <svg class="solution-card__icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10 9 9 9 8 9"/>
+                            </svg>
+                        </div>
+                        <div class="solution-card__content">
+                            <h3 class="solution-card__title">Auditoria Completa</h3>
+                            <p class="solution-card__text">
+                                Registros imutáveis de <strong>quem, quando, o quê e por quê</strong> para cada alteração, com metadados completos de contexto (IP, dispositivo, origem).
+                            </p>
+                            <ul class="solution-card__list">
+                                <li>Logs append-only (não editáveis)</li>
+                                <li>Hash SHA-256 para integridade</li>
+                                <li>Retenção de 7 anos (LGPD)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="solution-card" data-animate="fade-up" data-delay="300">
+                        <div class="solution-card__visual">
+                            <svg class="solution-card__icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                        </div>
+                        <div class="solution-card__content">
+                            <h3 class="solution-card__title">Analytics Avançado</h3>
+                            <p class="solution-card__text">
+                                Transforme dados históricos em insights estratégicos com <strong>filtros avançados, visualizações</strong> e exportação para BI/ML.
+                            </p>
+                            <ul class="solution-card__list">
+                                <li>Filtros por período, usuário, tipo</li>
+                                <li>Exportação CSV/JSON/Excel</li>
+                                <li>Integração com Tableau/Power BI</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES GRID -->
+        <section id="funcionalidades" class="section section--dark">
+            <div class="container">
+                <div class="section__header" data-animate="fade-up">
+                    <span class="section__label section__label--light">Funcionalidades</span>
+                    <h2 class="section__title section__title--light">
+                        Tecnologia de Ponta para <span class="text-accent">Gestão de Dados</span>
+                    </h2>
+                </div>
+                <div class="features-grid">
+                    <article class="feature-card" data-animate="fade-up" data-delay="100">
+                        <div class="feature-card__icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">Timestamps Automáticos</h3>
+                        <p class="feature-card__description">
+                            Registro preciso até milissegundos (Unix timestamp) com sincronização NTP para garantir ordem cronológica exata de eventos.
+                        </p>
+                        <ul class="feature-card__specs">
+                            <li><strong>Precisão:</strong> ±10ms</li>
+                            <li><strong>Fuso:</strong> UTC com conversão local</li>
+                            <li><strong>Formato:</strong> ISO 8601</li>
+                        </ul>
+                    </article>
+                    <article class="feature-card" data-animate="fade-up" data-delay="200">
+                        <div class="feature-card__icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">Registro de Alterações Completo</h3>
+                        <p class="feature-card__description">
+                            Captura automática de valores anteriores e novos em todos os campos com diff granular para reconstrução perfeita do estado.
+                        </p>
+                        <ul class="feature-card__specs">
+                            <li><strong>Campos rastreados:</strong> 100%</li>
+                            <li><strong>Diff algorítmico:</strong> JSON Patch</li>
+                            <li><strong>Replay:</strong> State reconstruction</li>
+                        </ul>
+                    </article>
+                    <article class="feature-card" data-animate="fade-up" data-delay="300">
+                        <div class="feature-card__icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0110 0v4"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">Auditoria e Compliance</h3>
+                        <p class="feature-card__description">
+                            Logs imutáveis com hash criptográfico SHA-256 garantem não-repúdio e conformidade total com LGPD, GDPR e SOC 2.
+                        </p>
+                        <ul class="feature-card__specs">
+                            <li><strong>Imutabilidade:</strong> Append-only</li>
+                            <li><strong>Integridade:</strong> SHA-256 hash</li>
+                            <li><strong>Retenção:</strong> 7 anos configurável</li>
+                        </ul>
+                    </article>
+                    <article class="feature-card" data-animate="fade-up" data-delay="100">
+                        <div class="feature-card__icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">Filtros Avançados</h3>
+                        <p class="feature-card__description">
+                            Query builder intuitivo com filtros por período, usuário, tipo de ação, status e campos customizados. Performance sub-segundo.
+                        </p>
+                        <ul class="feature-card__specs">
+                            <li><strong>Filtros:</strong> 15+ critérios</li>
+                            <li><strong>Resposta:</strong> &lt;500ms (p99)</li>
+                            <li><strong>Resultados:</strong> Paginação 10k+ registros</li>
+                        </ul>
+                    </article>
+                    <article class="feature-card" data-animate="fade-up" data-delay="200">
+                        <div class="feature-card__icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">Exportação de Dados</h3>
+                        <p class="feature-card__description">
+                            Exporte relatórios completos em múltiplos formatos (CSV, JSON, Excel, PDF) com agendamento automático e delivery por email/webhook.
+                        </p>
+                        <ul class="feature-card__specs">
+                            <li><strong>Formatos:</strong> CSV, JSON, XLSX, PDF</li>
+                            <li><strong>Agendamento:</strong> Cron jobs</li>
+                            <li><strong>Entrega:</strong> Email/S3/FTP</li>
+                        </ul>
+                    </article>
+                    <article class="feature-card" data-animate="fade-up" data-delay="300">
+                        <div class="feature-card__icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">Integrações API</h3>
+                        <p class="feature-card__description">
+                            REST API completa com autenticação OAuth 2.0, rate limiting e webhooks para consumo em tempo real por sistemas externos.
+                        </p>
+                        <ul class="feature-card__specs">
+                            <li><strong>Protocolo:</strong> REST + GraphQL</li>
+                            <li><strong>Auth:</strong> OAuth 2.0 + JWT</li>
+                            <li><strong>Rate limit:</strong> 1000 req/min</li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- TECHNICAL SPECIFICATIONS -->
+        <section id="especificacoes" class="section">
+            <div class="container">
+                <div class="section__header" data-animate="fade-up">
+                    <span class="section__label">Especificações Técnicas</span>
+                    <h2 class="section__title">
+                        Arquitetura <span class="text-accent">Enterprise-Grade</span>
+                    </h2>
+                </div>
+                <div class="specs-layout">
+                    <div class="specs-visual" data-animate="fade-right" data-delay="100">
+                        <div class="specs-diagram">
+                            <div class="specs-diagram__layer">
+                                <div class="specs-diagram__box">
+                                    <strong>Frontend</strong>
+                                    <span>React + TypeScript</span>
+                                </div>
+                            </div>
+                            <div class="specs-diagram__arrow">↓</div>
+                            <div class="specs-diagram__layer">
+                                <div class="specs-diagram__box">
+                                    <strong>API Gateway</strong>
+                                    <span>Load Balancer + Auth</span>
+                                </div>
+                            </div>
+                            <div class="specs-diagram__arrow">↓</div>
+                            <div class="specs-diagram__layer specs-diagram__layer--split">
+                                <div class="specs-diagram__box">
+                                    <strong>Event Bus</strong>
+                                    <span>RabbitMQ/Kafka</span>
+                                </div>
+                                <div class="specs-diagram__box">
+                                    <strong>Cache</strong>
+                                    <span>Redis Cluster</span>
+                                </div>
+                            </div>
+                            <div class="specs-diagram__arrow">↓</div>
+                            <div class="specs-diagram__layer specs-diagram__layer--triple">
+                                <div class="specs-diagram__box">
+                                    <strong>HOT</strong>
+                                    <span>PostgreSQL 15+</span>
+                                </div>
+                                <div class="specs-diagram__box">
+                                    <strong>WARM</strong>
+                                    <span>ClickHouse</span>
+                                </div>
+                                <div class="specs-diagram__box">
+                                    <strong>COLD</strong>
+                                    <span>S3/Glacier</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="specs-content" data-animate="fade-left" data-delay="200">
+                        <div class="specs-table">
+                            <h3 class="specs-table__title">Performance</h3>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Tempo de Registro</strong></td>
+                                        <td>&lt;100ms (p99)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Queries Simples</strong></td>
+                                        <td>&lt;200ms (p95)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Relatórios Complexos</strong></td>
+                                        <td>&lt;2s (10k+ registros)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Throughput</strong></td>
+                                        <td>10.000+ eventos/seg</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="specs-table">
+                            <h3 class="specs-table__title">Disponibilidade</h3>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>SLA Uptime</strong></td>
+                                        <td>99.9% (43min/mês)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>RPO (Recovery Point)</strong></td>
+                                        <td>&lt;5 minutos</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>RTO (Recovery Time)</strong></td>
+                                        <td>&lt;15 minutos</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Backup</strong></td>
+                                        <td>Incremental a cada 1h</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="specs-table">
+                            <h3 class="specs-table__title">Segurança</h3>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Criptografia</strong></td>
+                                        <td>AES-256 (rest + transit)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Autenticação</strong></td>
+                                        <td>OAuth 2.0 + MFA</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Compliance</strong></td>
+                                        <td>LGPD, GDPR, SOC 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Auditoria</strong></td>
+                                        <td>Logs imutáveis SHA-256</td>
+                                    </tr>
