@@ -14,7 +14,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "processor": "tsx scripts/local-processor.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",

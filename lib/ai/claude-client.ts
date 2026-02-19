@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { spawnSync } from 'child_process'
 
 /**
  * Available Claude models by capability tier
@@ -61,6 +62,33 @@ export function getClaudeMaxTokens(): number {
 }
 
 /**
+ * Executa uma chamada ao Claude via CLI local (claude -p).
+ * Usa a assinatura Claude.ai do usuário — sem consumo de API key.
+ * Ativado quando USE_CLAUDE_CODE=true no ambiente.
+ */
+function createClaudeMessageCLI(prompt: string, systemPrompt?: string): string {
+  // Monta o prompt completo: system + user separados por divisor claro
+  const fullPrompt = systemPrompt
+    ? `${systemPrompt}\n\n---\n\n${prompt}`
+    : prompt
+
+  const result = spawnSync('claude', ['-p', '--dangerously-skip-permissions', fullPrompt], {
+    encoding: 'utf-8',
+    timeout: 180000, // 3 min
+    maxBuffer: 10 * 1024 * 1024, // 10 MB
+  })
+
+  if (result.error) {
+    throw new Error(`Claude CLI error: ${result.error.message}`)
+  }
+  if (result.status !== 0) {
+    throw new Error(`Claude CLI exited with code ${result.status}: ${result.stderr?.slice(0, 500)}`)
+  }
+
+  return result.stdout.trim()
+}
+
+/**
  * Create a message using Claude AI with automatic retry on rate limit errors (429)
  *
  * @param prompt - The prompt to send to Claude
@@ -73,6 +101,11 @@ export async function createClaudeMessage(
   systemPrompt?: string,
   options?: ClaudeCallOptions
 ): Promise<string> {
+  // Modo CLI: usa Claude Code local (assinatura Claude.ai) em vez da API
+  if (process.env.USE_CLAUDE_CODE === 'true') {
+    return createClaudeMessageCLI(prompt, systemPrompt)
+  }
+
   const client = getClaudeClient();
   const maxRetries = 3
 
