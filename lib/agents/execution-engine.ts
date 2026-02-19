@@ -162,10 +162,12 @@ class ExecutionEngine {
         where: { id: execution.id },
         select: { metadata: true },
       })
-      const existingMeta = (currentExec?.metadata as Record<string, unknown>) ?? {}
-      const newMeta = result.artifacts
-        ? { ...existingMeta, artifacts: result.artifacts }
-        : Object.keys(existingMeta).length > 0 ? existingMeta : undefined
+      const existingMeta = (currentExec?.metadata ?? {}) as Record<string, unknown>
+      const mergedMeta: Record<string, unknown> = { ...existingMeta }
+      if (result.artifacts) mergedMeta.artifacts = result.artifacts
+      const newMeta = Object.keys(mergedMeta).length > 0
+        ? mergedMeta as Parameters<typeof prisma.agentExecution.update>[0]['data']['metadata']
+        : undefined
 
       await prisma.agentExecution.update({
         where: { id: execution.id },
