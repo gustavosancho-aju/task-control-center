@@ -102,8 +102,17 @@ export async function createClaudeMessage(
   options?: ClaudeCallOptions
 ): Promise<string> {
   // Modo CLI: usa Claude Code local (assinatura Claude.ai) em vez da API
-  if (process.env.USE_CLAUDE_CODE === 'true') {
+  // MAS: se estamos dentro de uma sessão Claude Code (CLAUDECODE exists), faz fallback para API
+  // para evitar nested sessions que causam crashes
+  const shouldUseCLI = process.env.USE_CLAUDE_CODE === 'true' && !process.env.CLAUDECODE
+
+  if (shouldUseCLI) {
     return createClaudeMessageCLI(prompt, systemPrompt)
+  }
+
+  // Log se fizemos fallback devido a nested session
+  if (process.env.USE_CLAUDE_CODE === 'true' && process.env.CLAUDECODE) {
+    console.warn('[claude-client] Nested Claude Code session detected (CLAUDECODE env var), falling back to API mode')
   }
 
   const client = getClaudeClient();
