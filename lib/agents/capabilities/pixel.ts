@@ -296,29 +296,48 @@ Retorne APENAS o código JavaScript dentro de um bloco \`\`\`javascript.`,
       await ctx.log('INFO', `JavaScript gerado (${(js.length / 1024).toFixed(1)} KB)`)
       await ctx.updateProgress(85)
 
-      // STEP 5: Salvar arquivos
-      const outputDir = path.join(process.cwd(), 'public', 'generated', task.id)
-      fs.mkdirSync(outputDir, { recursive: true })
-      fs.writeFileSync(path.join(outputDir, 'index.html'), html, 'utf-8')
-      fs.writeFileSync(path.join(outputDir, 'style.css'), css, 'utf-8')
-      fs.writeFileSync(path.join(outputDir, 'script.js'), js, 'utf-8')
+      // STEP 5: Persistir arquivos no DB (funciona em Vercel + local)
+      await prisma.agentExecution.update({
+        where: { id: ctx.execution.id },
+        data: {
+          metadata: {
+            files: {
+              'index.html': html,
+              'style.css': css,
+              'script.js': js,
+            },
+          },
+        },
+      })
+      await ctx.log('INFO', 'Arquivos persistidos no banco de dados')
 
-      await ctx.log('INFO', `Arquivos salvos em public/generated/${task.id}/`)
+      // Tentar salvar no filesystem local (apenas em dev, ignora falha no Vercel)
+      try {
+        const outputDir = path.join(process.cwd(), 'public', 'generated', task.id)
+        fs.mkdirSync(outputDir, { recursive: true })
+        fs.writeFileSync(path.join(outputDir, 'index.html'), html, 'utf-8')
+        fs.writeFileSync(path.join(outputDir, 'style.css'), css, 'utf-8')
+        fs.writeFileSync(path.join(outputDir, 'script.js'), js, 'utf-8')
+        await ctx.log('INFO', `Arquivos salvos no filesystem: public/generated/${task.id}/`)
+      } catch {
+        await ctx.log('INFO', 'Filesystem read-only (Vercel) — servindo via API route')
+      }
+
       await ctx.updateProgress(95)
 
       const summary = `Landing page gerada com sucesso:
 - HTML: ${(html.length / 1024).toFixed(1)} KB (${htmlClasses.length} classes)
 - CSS: ${(css.length / 1024).toFixed(1)} KB
 - JS: ${(js.length / 1024).toFixed(1)} KB
-- Preview: /generated/${task.id}/index.html`
+- Preview: /api/generated/${task.id}/index.html`
 
       return {
         success: true,
         result: summary,
         artifacts: [
-          `public/generated/${task.id}/index.html`,
-          `public/generated/${task.id}/style.css`,
-          `public/generated/${task.id}/script.js`,
+          `/api/generated/${task.id}/index.html`,
+          `/api/generated/${task.id}/style.css`,
+          `/api/generated/${task.id}/script.js`,
         ],
       }
     } catch (error) {

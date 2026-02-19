@@ -180,12 +180,30 @@ export const reviewLandingPage: AgentCapability = {
           select: { result: true, taskId: true },
         })
 
-        if (pixelExecution?.taskId) {
-          const dir = path.join(process.cwd(), 'public', 'generated', pixelExecution.taskId)
-          if (fs.existsSync(dir)) {
-            html = fs.readFileSync(path.join(dir, 'index.html'), 'utf-8').slice(0, 3000)
-            css = fs.readFileSync(path.join(dir, 'style.css'), 'utf-8').slice(0, 2000)
-            js = fs.readFileSync(path.join(dir, 'script.js'), 'utf-8').slice(0, 1500)
+        if (pixelExecution) {
+          // Tentar ler do filesystem (dev local)
+          if (pixelExecution.taskId) {
+            try {
+              const dir = path.join(process.cwd(), 'public', 'generated', pixelExecution.taskId)
+              if (fs.existsSync(dir)) {
+                html = fs.readFileSync(path.join(dir, 'index.html'), 'utf-8').slice(0, 3000)
+                css = fs.readFileSync(path.join(dir, 'style.css'), 'utf-8').slice(0, 2000)
+                js = fs.readFileSync(path.join(dir, 'script.js'), 'utf-8').slice(0, 1500)
+              }
+            } catch { /* filesystem indisponível */ }
+          }
+          // Fallback: ler do metadata do AgentExecution (Vercel)
+          if (!html && pixelExecution.taskId) {
+            const execWithMeta = await prisma.agentExecution.findFirst({
+              where: { taskId: pixelExecution.taskId, agent: { role: 'PIXEL' }, status: 'COMPLETED' },
+              select: { metadata: true },
+            })
+            const files = (execWithMeta?.metadata as Record<string, Record<string, string>> | null)?.files
+            if (files) {
+              html = (files['index.html'] ?? '').slice(0, 3000)
+              css = (files['style.css'] ?? '').slice(0, 2000)
+              js = (files['script.js'] ?? '').slice(0, 1500)
+            }
           }
         }
       }

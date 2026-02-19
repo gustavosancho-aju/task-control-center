@@ -61,10 +61,11 @@ export function getClaudeMaxTokens(): number {
 }
 
 /**
- * Create a message using Claude AI
+ * Create a message using Claude AI with automatic retry on rate limit errors (429)
  *
  * @param prompt - The prompt to send to Claude
  * @param systemPrompt - Optional system prompt for context
+ * @param options - Optional model/maxTokens override
  * @returns The AI response text
  */
 export async function createClaudeMessage(
@@ -73,26 +74,36 @@ export async function createClaudeMessage(
   options?: ClaudeCallOptions
 ): Promise<string> {
   const client = getClaudeClient();
+  const maxRetries = 3
 
-  const response = await client.messages.create({
-    model: options?.model ?? CLAUDE_CONFIG.model,
-    max_tokens: options?.maxTokens ?? CLAUDE_CONFIG.maxTokens,
-    system: systemPrompt,
-    messages: [
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
-  });
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await client.messages.create({
+        model: options?.model ?? CLAUDE_CONFIG.model,
+        max_tokens: options?.maxTokens ?? CLAUDE_CONFIG.maxTokens,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: prompt }],
+      })
 
-  // Extract text from the first content block
-  const firstBlock = response.content[0];
-  if (firstBlock.type === 'text') {
-    return firstBlock.text;
+      const firstBlock = response.content[0]
+      if (firstBlock.type === 'text') return firstBlock.text
+      throw new Error('Unexpected response format from Claude API')
+    } catch (error) {
+      const isRateLimit =
+        (error instanceof Error && error.message.includes('429')) ||
+        (typeof error === 'object' && error !== null && 'status' in error && (error as { status: number }).status === 429)
+
+      if (isRateLimit && attempt < maxRetries) {
+        const delay = Math.pow(2, attempt) * 2000 // 2s, 4s, 8s
+        console.warn(`[claude-client] Rate limit 429 — retry ${attempt + 1}/${maxRetries} em ${delay / 1000}s`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+        continue
+      }
+      throw error
+    }
   }
 
-  throw new Error('Unexpected response format from Claude API');
+  throw new Error('Unreachable')
 }
 
 /**
