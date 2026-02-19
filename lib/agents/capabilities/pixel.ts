@@ -1,4 +1,4 @@
-import { createClaudeMessage } from '@/lib/ai/claude-client'
+import { createClaudeMessage, CLAUDE_MODELS } from '@/lib/ai/claude-client'
 import type { AgentCapability, ExecutionContext, ExecutionResult } from '../execution-engine'
 import type { Task } from '@prisma/client'
 import prisma from '@/lib/db'
@@ -33,7 +33,7 @@ Forneça:
 7. **Espaçamento:** Grid system e spacing tokens utilizados
 8. **Acessibilidade:** ARIA labels, foco, contraste WCAG AA`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
       await ctx.log('INFO', 'Design de UI concluído')
       return { success: true, result, artifacts: ['ui-spec.md'] }
     } catch (error) {
@@ -68,7 +68,7 @@ Para cada componente, forneça:
 
 Use como base: React + Tailwind CSS + shadcn/ui`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
       await ctx.log('INFO', 'Especificação de componentes concluída')
       return { success: true, result, artifacts: ['components-spec.md'] }
     } catch (error) {
@@ -107,7 +107,7 @@ Para cada problema encontrado:
 - Heurística violada
 - Recomendação de melhoria`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
       await ctx.log('INFO', 'Revisão de UX concluída')
       return { success: true, result, artifacts: ['ux-review.md'] }
     } catch (error) {
@@ -157,7 +157,7 @@ Defina:
 
 Use formato compatível com Tailwind CSS e CSS custom properties.`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
       await ctx.log('INFO', 'Style guide criado com sucesso')
       return { success: true, result, artifacts: ['style-guide.md'] }
     } catch (error) {
@@ -220,7 +220,8 @@ REGRAS OBRIGATÓRIAS:
 - TODO o texto em português do Brasil
 
 Retorne APENAS o código HTML completo dentro de um bloco \`\`\`html.`,
-        SYSTEM_PROMPT
+        SYSTEM_PROMPT,
+        { model: CLAUDE_MODELS.sonnet, maxTokens: 8192 }
       )
 
       const html = extractCode(htmlResult, 'html')
@@ -256,7 +257,8 @@ REGRAS OBRIGATÓRIAS:
 - Cores e fontes conforme o plano arquitetural
 
 Retorne APENAS o código CSS completo dentro de um bloco \`\`\`css.`,
-        SYSTEM_PROMPT
+        SYSTEM_PROMPT,
+        { model: CLAUDE_MODELS.sonnet, maxTokens: 6000 }
       )
 
       const css = extractCode(cssResult, 'css')
@@ -286,7 +288,8 @@ REGRAS:
 - Performance: requestAnimationFrame para parallax, passive listeners
 
 Retorne APENAS o código JavaScript dentro de um bloco \`\`\`javascript.`,
-        SYSTEM_PROMPT
+        SYSTEM_PROMPT,
+        { model: CLAUDE_MODELS.sonnet, maxTokens: 4096 }
       )
 
       const js = extractCode(jsResult, 'javascript')

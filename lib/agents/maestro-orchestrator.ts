@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client'
 import type { Task, AgentRole, TaskPriority } from '@prisma/client'
 import prisma from '@/lib/db'
-import { createClaudeJsonMessage } from '@/lib/ai/claude-client'
+import { createClaudeJsonMessage, CLAUDE_MODELS } from '@/lib/ai/claude-client'
 import { queueManager } from '@/lib/agents/queue-manager'
 import { agentEventEmitter, AgentEventTypes } from '@/lib/agents/event-emitter'
 import { dependencyManager } from '@/lib/agents/dependency-manager'
@@ -239,7 +239,7 @@ Formato de resposta (JSON puro):
   "recommendedOrder": ["Título subtarefa 1", "Título subtarefa 2", "..."]
 }`
 
-    const plan = await createClaudeJsonMessage<OrchestrationPlan>(prompt, systemPrompt)
+    const plan = await createClaudeJsonMessage<OrchestrationPlan>(prompt, systemPrompt, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
 
     // Valida estrutura básica
     if (!plan.phases || !Array.isArray(plan.phases)) {

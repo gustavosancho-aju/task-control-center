@@ -1,4 +1,4 @@
-import { createClaudeMessage } from '@/lib/ai/claude-client'
+import { createClaudeMessage, CLAUDE_MODELS } from '@/lib/ai/claude-client'
 import type { AgentCapability, ExecutionContext, ExecutionResult } from '../execution-engine'
 import type { Task } from '@prisma/client'
 import prisma from '@/lib/db'
@@ -32,7 +32,7 @@ Analise e forneça:
 
 Classifique cada item encontrado como: CRITICAL, HIGH, MEDIUM, LOW`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
       await ctx.log('INFO', 'Revisão de código concluída')
       return { success: true, result, artifacts: ['code-review.md'] }
     } catch (error) {
@@ -69,7 +69,7 @@ Para cada teste, inclua:
 - Ação (When)
 - Resultado esperado (Then)`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
       await ctx.log('INFO', 'Estratégia de testes definida')
       return { success: true, result, artifacts: ['test-plan.md'] }
     } catch (error) {
@@ -105,7 +105,7 @@ Verifique:
 
 Forneça um veredito: PASS, CONCERNS ou FAIL com justificativa.`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
       await ctx.log('INFO', 'Verificação de qualidade concluída')
       return { success: true, result, artifacts: ['quality-report.md'] }
     } catch (error) {
@@ -147,7 +147,7 @@ Para cada vulnerabilidade encontrada:
 - Recomendação de mitigação
 - Exemplo de correção`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.sonnet, maxTokens: 4096 })
       await ctx.log('INFO', 'Auditoria de segurança concluída')
       return { success: true, result, artifacts: ['security-audit.md'] }
     } catch (error) {
@@ -183,9 +183,9 @@ export const reviewLandingPage: AgentCapability = {
         if (pixelExecution?.taskId) {
           const dir = path.join(process.cwd(), 'public', 'generated', pixelExecution.taskId)
           if (fs.existsSync(dir)) {
-            html = fs.readFileSync(path.join(dir, 'index.html'), 'utf-8').slice(0, 8000)
-            css = fs.readFileSync(path.join(dir, 'style.css'), 'utf-8').slice(0, 6000)
-            js = fs.readFileSync(path.join(dir, 'script.js'), 'utf-8').slice(0, 4000)
+            html = fs.readFileSync(path.join(dir, 'index.html'), 'utf-8').slice(0, 3000)
+            css = fs.readFileSync(path.join(dir, 'style.css'), 'utf-8').slice(0, 2000)
+            js = fs.readFileSync(path.join(dir, 'script.js'), 'utf-8').slice(0, 1500)
           }
         }
       }
@@ -197,7 +197,7 @@ export const reviewLandingPage: AgentCapability = {
       await ctx.updateProgress(30)
 
       const codeContext = html
-        ? `\n\nARQUIVOS GERADOS (trechos):\n\n--- HTML (primeiros 8KB) ---\n${html}\n\n--- CSS (primeiros 6KB) ---\n${css}\n\n--- JS (primeiros 4KB) ---\n${js}`
+        ? `\n\nARQUIVOS GERADOS (trechos):\n\n--- HTML ---\n${html}\n\n--- CSS ---\n${css}\n\n--- JS ---\n${js}`
         : ''
 
       const result = await createClaudeMessage(
@@ -222,7 +222,8 @@ Para cada problema encontrado:
 - Recomendação de correção
 
 Finalize com SCORE TOTAL (média) e veredicto: APPROVED / NEEDS_REVISION / REJECTED.`,
-        SYSTEM_PROMPT
+        SYSTEM_PROMPT,
+        { model: CLAUDE_MODELS.haiku, maxTokens: 3000 }
       )
 
       await ctx.log('INFO', 'Revisão de landing page concluída')

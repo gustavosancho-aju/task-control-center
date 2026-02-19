@@ -1,4 +1,4 @@
-import { createClaudeMessage } from '@/lib/ai/claude-client'
+import { createClaudeMessage, CLAUDE_MODELS } from '@/lib/ai/claude-client'
 import type { AgentCapability, ExecutionContext, ExecutionResult } from '../execution-engine'
 import type { Task } from '@prisma/client'
 
@@ -28,7 +28,7 @@ Forneça:
 6. **Escalabilidade:** Como a solução escala horizontal e verticalmente
 7. **Trade-offs:** Decisões tomadas e alternativas consideradas`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
       await ctx.log('INFO', 'Design de arquitetura concluído')
       return { success: true, result, artifacts: ['architecture.md'] }
     } catch (error) {
@@ -61,7 +61,7 @@ Forneça usando formato Prisma Schema:
 6. **Migrações:** Plano de migração se houver schema existente
 7. **Queries comuns:** Exemplos das queries mais frequentes`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
       await ctx.log('INFO', 'Schema criado com sucesso')
       return { success: true, result, artifacts: ['schema.prisma'] }
     } catch (error) {
@@ -94,7 +94,7 @@ Crie um ADR (Architecture Decision Record) contendo:
 6. **Consequências:** Impactos positivos e negativos da decisão
 7. **Compliance:** Requisitos de conformidade atendidos`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
       await ctx.log('INFO', 'Documentação arquitetural concluída')
       return { success: true, result, artifacts: ['adr.md'] }
     } catch (error) {
@@ -133,7 +133,7 @@ Para cada recomendação:
 - Custo estimado (quando aplicável)
 - Maturidade e suporte da comunidade`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 2048 })
       await ctx.log('INFO', 'Avaliação de tech stack concluída')
       return { success: true, result, artifacts: ['tech-evaluation.md'] }
     } catch (error) {
@@ -170,7 +170,7 @@ Defina com PRECISÃO (os valores serão usados diretamente no código):
 
 Seja ESPECÍFICO com cores, textos e fontes — eles serão usados diretamente no código gerado.`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.sonnet, maxTokens: 3000 })
       await ctx.log('INFO', 'Plano de landing page concluído')
       await ctx.updateProgress(90)
       return { success: true, result, artifacts: ['landing-page-plan.md'] }

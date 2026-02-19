@@ -1,10 +1,27 @@
 import Anthropic from '@anthropic-ai/sdk';
 
 /**
+ * Available Claude models by capability tier
+ */
+export const CLAUDE_MODELS = {
+  /** Full reasoning — code generation, security audits, complex output */
+  sonnet: 'claude-sonnet-4-5-20250929',
+  /** Fast + cheap — planning, analysis, review reports, JSON output */
+  haiku: 'claude-haiku-4-5-20251001',
+} as const
+
+export type ClaudeModel = typeof CLAUDE_MODELS[keyof typeof CLAUDE_MODELS]
+
+export interface ClaudeCallOptions {
+  model?: ClaudeModel
+  maxTokens?: number
+}
+
+/**
  * Configuration for Claude AI client
  */
 const CLAUDE_CONFIG = {
-  model: 'claude-sonnet-4-20250514',
+  model: CLAUDE_MODELS.sonnet,
   maxTokens: 8192,
 } as const;
 
@@ -52,13 +69,14 @@ export function getClaudeMaxTokens(): number {
  */
 export async function createClaudeMessage(
   prompt: string,
-  systemPrompt?: string
+  systemPrompt?: string,
+  options?: ClaudeCallOptions
 ): Promise<string> {
   const client = getClaudeClient();
 
   const response = await client.messages.create({
-    model: CLAUDE_CONFIG.model,
-    max_tokens: CLAUDE_CONFIG.maxTokens,
+    model: options?.model ?? CLAUDE_CONFIG.model,
+    max_tokens: options?.maxTokens ?? CLAUDE_CONFIG.maxTokens,
     system: systemPrompt,
     messages: [
       {
@@ -121,9 +139,10 @@ function sanitizeJsonResponse(raw: string): string {
 
 export async function createClaudeJsonMessage<T>(
   prompt: string,
-  systemPrompt?: string
+  systemPrompt?: string,
+  options?: ClaudeCallOptions
 ): Promise<T> {
-  const response = await createClaudeMessage(prompt, systemPrompt)
+  const response = await createClaudeMessage(prompt, systemPrompt, options)
   const sanitized = sanitizeJsonResponse(response)
 
   try {

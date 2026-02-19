@@ -1,4 +1,4 @@
-import { createClaudeMessage } from '@/lib/ai/claude-client'
+import { createClaudeMessage, CLAUDE_MODELS } from '@/lib/ai/claude-client'
 import type { AgentCapability, ExecutionContext, ExecutionResult } from '../execution-engine'
 import type { Task } from '@prisma/client'
 
@@ -27,7 +27,7 @@ Forneça:
 4. Riscos identificados
 5. Ordem de execução recomendada`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 1024 })
       await ctx.log('INFO', 'Decomposição concluída', { subtaskCount: (result.match(/^\d+\./gm) || []).length })
       return { success: true, result }
     } catch (error) {
@@ -63,7 +63,7 @@ Para cada aspecto da tarefa, indique:
 3. Dependências entre os trabalhos dos agentes
 4. Pontos de sincronização necessários`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 1024 })
       await ctx.log('INFO', 'Atribuição de agentes concluída')
       return { success: true, result }
     } catch (error) {
@@ -96,7 +96,7 @@ Forneça:
 5. Critérios de conclusão (definition of done)
 6. Plano de contingência para bloqueios`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 1024 })
       await ctx.log('INFO', 'Plano de coordenação criado')
       return { success: true, result }
     } catch (error) {
@@ -133,7 +133,7 @@ Gere um relatório contendo:
 5. Próximos passos recomendados
 6. Conclusão com recomendação de ação`
 
-      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT)
+      const result = await createClaudeMessage(prompt, SYSTEM_PROMPT, { model: CLAUDE_MODELS.haiku, maxTokens: 1500 })
       await ctx.log('INFO', 'Relatório gerado com sucesso')
       return { success: true, result, artifacts: ['report.md'] }
     } catch (error) {
