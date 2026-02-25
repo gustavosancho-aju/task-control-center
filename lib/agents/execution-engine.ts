@@ -70,6 +70,14 @@ Analise a tarefa e proponha uma solução arquitetural.`,
 - Design systems e padrões visuais
 - Acessibilidade e experiência do usuário
 Analise a tarefa e proponha melhorias de interface.`,
+
+  FINISH: `Você é o FINISH, finalizador de tarefas especializado em:
+- Consolidação de resultados
+- Deployment e publicação
+- Documentação e relatórios
+- Validação final
+- Entrega ao cliente
+Analise a tarefa completa e forneça resultado final.`,
 }
 
 // ============================================================================
